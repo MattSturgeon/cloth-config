@@ -1,8 +1,9 @@
 package me.shedaniel.autoconfig.dependencies;
 
+import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.ConfigEntry.Dependency.EnableIf;
 import me.shedaniel.autoconfig.annotation.ConfigEntry.Dependency.ShowIf;
-import me.shedaniel.autoconfig.util.RelativeI18n;
+import me.shedaniel.autoconfig.util.RelativeRefParser;
 import me.shedaniel.clothconfig2.api.ConfigEntry;
 import me.shedaniel.clothconfig2.api.NumberConfigEntry;
 import me.shedaniel.clothconfig2.api.dependencies.Dependency;
@@ -13,11 +14,12 @@ import me.shedaniel.clothconfig2.gui.entries.BooleanListEntry;
 import me.shedaniel.clothconfig2.gui.entries.EnumListEntry;
 import me.shedaniel.clothconfig2.impl.dependencies.*;
 import me.shedaniel.clothconfig2.impl.dependencies.conditions.BooleanStaticCondition;
+import me.shedaniel.clothconfig2.impl.dependencies.conditions.ComparativeMatcherCondition;
 import me.shedaniel.clothconfig2.impl.dependencies.conditions.EnumStaticCondition;
 import me.shedaniel.clothconfig2.impl.dependencies.conditions.GenericStaticCondition;
-import me.shedaniel.clothconfig2.impl.dependencies.conditions.ComparativeMatcherCondition;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.function.Function;
@@ -27,30 +29,30 @@ import java.util.stream.Collectors;
  * A record defining a dependency to be built.
  * Can be declared using either an {@link EnableIf @EnableIf} or {@link ShowIf @ShowIf} annotation.
  *
- * @param i18n the absolute i18n key of the depended-on config entry
+ * @param key the absolute i18n key of the depended-on config entry
  * @param tooltip whether the dependency should auto-generate tooltips
  * @param allowGeneric whether the dependency should still be built if a type-specific dependency is not supported
  * @param conditions flagged strings to be parsed into dependency conditions
  * @param matching flagged strings to be parsed into dynamic dependency conditions
  * @see DependencyGroupDefinition
  */
-record DependencyDefinition(String i18n, boolean tooltip, boolean allowGeneric, Set<StaticConditionDefinition> conditions, Set<MatcherConditionDefinition> matching) {
+record DependencyDefinition(Field key, boolean tooltip, boolean allowGeneric, Set<StaticConditionDefinition> conditions, Set<MatcherConditionDefinition> matching) {
     
-    DependencyDefinition(@Nullable String i18nBase, EnableIf annotation) {
-        this(i18nBase, annotation.value(), annotation.tooltip(), annotation.allowGeneric(), annotation.conditions(), annotation.matching());
+    DependencyDefinition(@Nullable Class<? extends ConfigData> configClass, EnableIf annotation) {
+        this(configClass, annotation.value(), annotation.tooltip(), annotation.allowGeneric(), annotation.conditions(), annotation.matching());
     }
     
-    DependencyDefinition(@Nullable String i18nBase, ShowIf annotation) {
-        this(i18nBase, annotation.value(), annotation.tooltip(), annotation.allowGeneric(), annotation.conditions(), annotation.matching());
+    DependencyDefinition(@Nullable Class<? extends ConfigData> configClass, ShowIf annotation) {
+        this(configClass, annotation.value(), annotation.tooltip(), annotation.allowGeneric(), annotation.conditions(), annotation.matching());
     }
     
-    private DependencyDefinition(@Nullable String i18nBase, String i18nKey, boolean tooltip, boolean allowGeneric, String[] conditions, String[] matching) {
-        this(RelativeI18n.parse(i18nBase, i18nKey), tooltip, allowGeneric,
+    private DependencyDefinition(@Nullable Class<? extends ConfigData> configClass, String reference, boolean tooltip, boolean allowGeneric, String[] conditions, String[] matching) {
+        this(RelativeRefParser.getField(configClass, reference), tooltip, allowGeneric,
                 Arrays.stream(conditions)
                         .map(StaticConditionDefinition::fromConditionString)
                         .collect(Collectors.toUnmodifiableSet()), 
                 Arrays.stream(matching)
-                        .map(condition -> MatcherConditionDefinition.fromConditionString(i18nBase, condition))
+                        .map(condition -> MatcherConditionDefinition.fromConditionString(configClass, condition))
                         .collect(Collectors.toUnmodifiableSet()));
     }
     
@@ -60,13 +62,13 @@ record DependencyDefinition(String i18n, boolean tooltip, boolean allowGeneric, 
     
     private <T> Set<MatcherCondition<T>> buildMatchers(Class<T> type, DependencyManager manager) {
         return this.matching().stream()
-                .map(definition -> definition.toMatcher(manager.getEntry(type, definition.i18n())))
+                .map(definition -> definition.toMatcher(manager.getEntry(type, definition.referencedField())))
                 .collect(Collectors.toUnmodifiableSet());
     }
     
     private <T extends Comparable<T>> Set<ComparativeMatcherCondition<T>> buildComparativeMatchers(Class<T> type, DependencyManager manager) {
         return this.matching().stream()
-                .map(definition -> definition.toComparativeMatcher(manager.getEntry(type, definition.i18n())))
+                .map(definition -> definition.toComparativeMatcher(manager.getEntry(type, definition.referencedField())))
                 .collect(Collectors.toUnmodifiableSet());
     }
     
@@ -87,7 +89,7 @@ record DependencyDefinition(String i18n, boolean tooltip, boolean allowGeneric, 
      * @throws IllegalArgumentException if the defined dependency is invalid
      */
     public Dependency build(DependencyManager manager) {
-        me.shedaniel.clothconfig2.api.ConfigEntry<?> gui = manager.getEntry(this.i18n());
+        me.shedaniel.clothconfig2.api.ConfigEntry<?> gui = manager.getEntry(this.key());
         
         if (gui instanceof BooleanListEntry booleanListEntry)
             return this.build(manager, booleanListEntry);

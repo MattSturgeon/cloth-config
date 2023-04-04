@@ -29,7 +29,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
@@ -137,12 +136,6 @@ public class TextListEntry extends TooltipListEntry<Object> {
     @Override
     public Object getValue() {
         return null;
-    }
-    
-    @Override
-    public String getI18nKey() {
-        return this.text.getContents() instanceof TranslatableContents translatable ?
-                translatable.getKey() : this.text.getString();
     }
     
     @Override

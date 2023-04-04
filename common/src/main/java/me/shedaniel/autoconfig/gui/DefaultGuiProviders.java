@@ -136,7 +136,7 @@ public class DefaultGuiProviders {
                     // Apply the field's dependency to its children
                     if (!children.isEmpty() && DependencyManager.hasDependencyAnnotation(field)) {
                         DependencyManager dependencies = guiProvider.getDependencyManager();
-                        children.forEach(gui -> dependencies.register(gui, field, i18n));
+                        children.forEach(gui -> dependencies.register(gui, field));
                     }
                     
                     return children;

@@ -2,9 +2,11 @@ package me.shedaniel.clothconfig2.api;
 
 import me.shedaniel.clothconfig2.api.dependencies.Dependency;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.contents.TranslatableContents;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Field;
 
 public interface ConfigEntry<T> {
     
@@ -30,11 +32,8 @@ public interface ConfigEntry<T> {
     
     Component getFieldName();
     
-    default String getI18nKey() {
-        Component component = getFieldName();
-        return component.getContents() instanceof TranslatableContents translatable ?
-                translatable.getKey() : component.getString();
-    }
+    @ApiStatus.Internal
+    Field getOrSetDeclaringField(Field field);
     
     @Contract(pure = true)
     default Class<T> getType() {

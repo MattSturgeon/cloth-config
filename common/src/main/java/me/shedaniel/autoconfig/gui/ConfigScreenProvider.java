@@ -91,11 +91,11 @@ public class ConfigScreenProvider<T extends ConfigData> implements Supplier<Scre
         T defaults = manager.getSerializer().createDefault();
         
         String i18n = i18nFunction.apply(manager);
-        registry.getDependencyManager().setPrefix(i18n);
         
         ConfigBuilder builder = ConfigBuilder.create().setParentScreen(parent).setTitle(Component.translatable(String.format("%s.title", i18n))).setSavingRunnable(manager::save);
         
         Class<T> configClass = manager.getConfigClass();
+        registry.getDependencyManager().setConfigClass(configClass);
         
         if (configClass.isAnnotationPresent(Config.Gui.Background.class)) {
             String bg = configClass.getAnnotation(Config.Gui.Background.class).value();

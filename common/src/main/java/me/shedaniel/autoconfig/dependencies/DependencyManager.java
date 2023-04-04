@@ -1,10 +1,11 @@
 package me.shedaniel.autoconfig.dependencies;
 
+import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.ConfigEntry.Dependency.EnableIf;
 import me.shedaniel.autoconfig.annotation.ConfigEntry.Dependency.EnableIfGroup;
 import me.shedaniel.autoconfig.annotation.ConfigEntry.Dependency.ShowIf;
 import me.shedaniel.autoconfig.annotation.ConfigEntry.Dependency.ShowIfGroup;
-import me.shedaniel.autoconfig.util.RelativeI18n;
+import me.shedaniel.autoconfig.util.RelativeRefParser;
 import me.shedaniel.clothconfig2.api.ConfigEntry;
 import me.shedaniel.clothconfig2.api.dependencies.Dependency;
 import me.shedaniel.clothconfig2.impl.dependencies.DependencyGroup;
@@ -32,45 +33,39 @@ import java.util.stream.Stream;
  */
 public class DependencyManager {
     
-    private final Map<String, EntryRecord> registry = new LinkedHashMap<>();
+    private final Map<Field, EntryRecord> registry = new LinkedHashMap<>();
     
-    private @Nullable String prefix;
+    private Class<? extends ConfigData> configClass = null;
     
     public DependencyManager() {}
     
     /**
-     * Define a prefix which {@link #register(ConfigEntry, Field, String) register()} will add
+     * Define a prefix which {@link #register(ConfigEntry, Field) register()} will add
      * to i18n keys if they don't already start with it.
      * <br><br>
      * Should normally be set to the i18n key of the root {@link me.shedaniel.autoconfig.annotation.Config @Config}
      * class.
-     * 
-     * @param prefix the i18n prefix 
+     *
+     * @param configClass the i18n prefix
      */
-    public void setPrefix(@Nullable String prefix) {
-        this.prefix = prefix;
+    public void setConfigClass(@Nullable Class<? extends ConfigData> configClass) {
+        this.configClass = configClass;
     }
     
     /**
      * Get the config entry GUI associated with the given i18n key.
      * <p>
      * Will look for an entry exactly matching {@code i18n}, otherwise will look again, prefixing {@code i18n} with
-     * the prefix defined using {@link #setPrefix(String)}.
+     * the prefix defined using {@link #setConfigClass(Class)}.
      *
-     * @param i18n the i18n key 
+     * @param field the i18n key
      * @return The matching config entry
      * @throws IllegalArgumentException if a matching config entry is not found
      */
-    public ConfigEntry<?> getEntry(String i18n) throws IllegalArgumentException {
-        EntryRecord record = registry.get(i18n);
-        
-        if (record == null && prefix != null)
-            record = registry.get(RelativeI18n.prefix(prefix, i18n));
-        
-        if (record == null)
-            throw new IllegalArgumentException("Specified config entry not found: \"%s\"".formatted(i18n));
-        
-        return record.gui();
+    public ConfigEntry<?> getEntry(@NotNull Field field) throws IllegalArgumentException {
+        return Optional.ofNullable(registry.get(field))
+                .map(EntryRecord::gui)
+                .orElseThrow(() -> new IllegalArgumentException("Specified config entry not found: \"%s\"".formatted(field)));
     }
     
     /**
@@ -79,17 +74,17 @@ public class DependencyManager {
      *
      * @param <T>  the type the GUI must support
      * @param type a {@code Class} representing type {@code <T>}
-     * @param i18n the i18n key
+     * @param field the field that declared the GUI
      * @return The matching config entry
      * @throws IllegalArgumentException if a matching config entry supporting type {@code <T>} is not found
      */
-    public <T> ConfigEntry<T> getEntry(Class<T> type, String i18n) throws IllegalArgumentException {
-        ConfigEntry<?> entry = getEntry(i18n);
+    public <T> ConfigEntry<T> getEntry(Class<T> type, Field field) throws IllegalArgumentException {
+        ConfigEntry<?> entry = getEntry(field);
         
         // Entry's type must extend from the provided type 
         if (!type.isAssignableFrom(entry.getType()))
             throw new IllegalArgumentException("Specified config entry does not support the required type. Found %s, required %s for \"%s\"."
-                    .formatted(entry.getType().getSimpleName(), type.getSimpleName(), i18n));
+                    .formatted(entry.getType().getSimpleName(), type.getSimpleName(), RelativeRefParser.getReference(field)));
     
         // If type is assignable, we can safely cast to <T>
         @SuppressWarnings("unchecked") ConfigEntry<T> tEntry = (ConfigEntry<T>) entry;
@@ -99,12 +94,11 @@ public class DependencyManager {
     /**
      * Register a new or transformed config entry for later use by {@link #build()}.
      *
-     * @param entry     the {@link me.shedaniel.autoconfig.annotation.ConfigEntry config entry} GUI to be registered
-     * @param field     a {@link Field} which may have dependency annotations present
-     * @param fieldI18n the i18n key of the field (not necessarily the GUI)
+     * @param entry the {@link me.shedaniel.autoconfig.annotation.ConfigEntry config entry} GUI to be registered
+     * @param field a {@link Field} which may have dependency annotations present
      * @see #build()
      */
-    public void register(ConfigEntry<?> entry, @Nullable Field field, @Nullable String fieldI18n) {
+    public void register(ConfigEntry<?> entry, Field field) {
         Set<EnableIf> enableIfs = null;
         Set<EnableIfGroup> enableIfGroups = null;
         Set<ShowIf> showIfs = null;
@@ -120,12 +114,8 @@ public class DependencyManager {
             if (field.isAnnotationPresent(ShowIfGroup.class))
                 showIfGroups = Collections.singleton(field.getAnnotation(ShowIfGroup.class));
         }
-        
-        String i18nBase = Optional.ofNullable(fieldI18n)
-                .map(RelativeI18n::parent)
-                .orElse(null);
     
-        register(entry, i18nBase, enableIfs, enableIfGroups, showIfs, showIfGroups);
+        register(entry, field, enableIfs, enableIfGroups, showIfs, showIfGroups);
     }
     
     /**
@@ -135,26 +125,26 @@ public class DependencyManager {
      * annotations to be applied to this entry.
      *
      * @param entry                    the config entry GUI
-     * @param i18nBase                 an absolute i18n key, to be used as the base reference of the dependencies
+     * @param field                    a {@link Field} to be used as the reference key for this config entry
      * @param enableIfAnnotations      a {@link Collection} of {@link EnableIf @EnableIf} annotations
      * @param enableIfGroupAnnotations a {@link Collection} of {@link EnableIfGroup @EnableIfGroup} annotations
      * @param showIfAnnotations        a {@link Collection} of {@link ShowIf @ShowIf} annotations
      * @param showIfGroupAnnotations   a {@link Collection} of {@link ShowIfGroup @ShowIfGroup} annotations
-     * @see #register(ConfigEntry, Field, String)
+     * @see #register(ConfigEntry, Field)
      * @see #build()
      */
     public void register(
             ConfigEntry<?> entry,
-            @Nullable String i18nBase,
+            Field field,
             @Nullable Collection<EnableIf> enableIfAnnotations,
             @Nullable Collection<EnableIfGroup> enableIfGroupAnnotations,
             @Nullable Collection<ShowIf> showIfAnnotations,
             @Nullable Collection<ShowIfGroup> showIfGroupAnnotations)
     {
-        String i18n = entry.getI18nKey();
+        Field key = entry.getOrSetDeclaringField(field);
     
         // Get the already defined sets or create new ones
-        Optional<EntryRecord> optional = Optional.ofNullable(registry.get(i18n));
+        Optional<EntryRecord> optional = Optional.ofNullable(registry.get(key));
         
         Set<DependencyDefinition> enableIfs = optional
                 .map(EntryRecord::enableIfDependencies)
@@ -175,25 +165,25 @@ public class DependencyManager {
         // Add the new dependencies to the appropriate sets
         enableIfs.addAll(Stream.ofNullable(enableIfAnnotations)
                 .flatMap(Collection::stream)
-                .map(single -> new DependencyDefinition(i18nBase, single))
+                .map(single -> new DependencyDefinition(configClass, single))
                 .collect(Collectors.toUnmodifiableSet()));
     
         enableIfGroups.addAll(Stream.ofNullable(enableIfGroupAnnotations)
                 .flatMap(Collection::stream)
-                .map(group -> new DependencyGroupDefinition(i18nBase, group))
+                .map(group -> new DependencyGroupDefinition(configClass, group))
                 .collect(Collectors.toUnmodifiableSet()));
         
         showIfs.addAll(Stream.ofNullable(showIfAnnotations)
                 .flatMap(Collection::stream)
-                .map(single -> new DependencyDefinition(i18nBase, single))
+                .map(single -> new DependencyDefinition(configClass, single))
                 .collect(Collectors.toUnmodifiableSet()));
     
         showIfGroups.addAll(Stream.ofNullable(showIfGroupAnnotations)
                 .flatMap(Collection::stream)
-                .map(group -> new DependencyGroupDefinition(i18nBase, group))
+                .map(group -> new DependencyGroupDefinition(configClass, group))
                 .collect(Collectors.toUnmodifiableSet()));
         
-        registry.put(i18n, new EntryRecord(entry, enableIfs, enableIfGroups, showIfs, showIfGroups));
+        registry.put(key, new EntryRecord(entry, enableIfs, enableIfGroups, showIfs, showIfGroups));
     }
     
     /**
@@ -203,7 +193,7 @@ public class DependencyManager {
      * <br><br>
      * If a field has multiple dependencies declared, they will be combined using {@link #combineDependencies(Collection, Collection) combineDependencies()}.
      * 
-     * @see #register(ConfigEntry, Field, String)
+     * @see #register(ConfigEntry, Field)
      */
     public void build() {
         registry.values().stream()

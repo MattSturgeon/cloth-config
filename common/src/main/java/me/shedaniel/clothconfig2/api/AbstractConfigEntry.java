@@ -36,6 +36,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -58,6 +59,7 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
     @Nullable
     private Dependency enableIfDependency = null;
     private Dependency showIfDependency = null;
+    private Field declaringField = null;
     
     public final void setReferenceProviderEntries(@Nullable List<ReferenceProvider<?>> referencableEntries) {
         this.referencableEntries = referencableEntries;
@@ -79,6 +81,12 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
     @ApiStatus.Internal
     public final List<ReferenceProvider<?>> getReferenceProviderEntries() {
         return referencableEntries;
+    }
+    
+    @Override
+    public Field getOrSetDeclaringField(@Nullable Field field) {
+        if (this.declaringField == null) this.declaringField = field;
+        return this.declaringField;
     }
     
     public abstract boolean isRequiresRestart();

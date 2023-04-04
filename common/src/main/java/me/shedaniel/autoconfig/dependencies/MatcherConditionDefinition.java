@@ -1,24 +1,26 @@
 package me.shedaniel.autoconfig.dependencies;
 
+import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.ConfigEntry.Dependency.EnableIf;
-import me.shedaniel.autoconfig.util.RelativeI18n;
+import me.shedaniel.autoconfig.util.RelativeRefParser;
 import me.shedaniel.clothconfig2.api.ConfigEntry;
 import me.shedaniel.clothconfig2.api.dependencies.conditions.ComparisonOperator;
-import me.shedaniel.clothconfig2.api.dependencies.conditions.MatcherCondition;
 import me.shedaniel.clothconfig2.api.dependencies.conditions.ConditionFlag;
-import me.shedaniel.clothconfig2.impl.dependencies.conditions.GenericMatcherCondition;
+import me.shedaniel.clothconfig2.api.dependencies.conditions.MatcherCondition;
 import me.shedaniel.clothconfig2.impl.dependencies.conditions.ComparativeMatcherCondition;
+import me.shedaniel.clothconfig2.impl.dependencies.conditions.GenericMatcherCondition;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.EnumSet;
 
-record MatcherConditionDefinition(EnumSet<ConditionFlag> flags, @Nullable ComparisonOperator operator, String i18n) {
+record MatcherConditionDefinition(EnumSet<ConditionFlag> flags, @Nullable ComparisonOperator operator, Field referencedField) {
     
     /**
      * @see StaticConditionDefinition
      * @see EnableIf#matching() Public API documentation
      */
-    static MatcherConditionDefinition fromConditionString(String i18nBase, String condition) {
+    static MatcherConditionDefinition fromConditionString(Class<? extends ConfigData> configClass, String condition) {
         // Parse any flags
         StaticConditionDefinition definition = StaticConditionDefinition.fromConditionString(condition)
                 .map(String::strip);
@@ -31,9 +33,9 @@ record MatcherConditionDefinition(EnumSet<ConditionFlag> flags, @Nullable Compar
                     .map(String::stripLeading);
     
         // Parse the i18n reference
-        definition = definition.map(string -> RelativeI18n.parse(i18nBase, string));
-        
-        return new MatcherConditionDefinition(definition.flags(), operator, definition.condition());
+        Field key = RelativeRefParser.getField(configClass, definition.condition());
+    
+        return new MatcherConditionDefinition(definition.flags(), operator, key);
     }
     
     <T> MatcherCondition<T> toMatcher(ConfigEntry<T> gui) {

@@ -1,6 +1,7 @@
 package me.shedaniel.autoconfig.dependencies;
 
 
+import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.ConfigEntry.Dependency.EnableIfGroup;
 import me.shedaniel.autoconfig.annotation.ConfigEntry.Dependency.ShowIfGroup;
 import me.shedaniel.clothconfig2.api.dependencies.Dependency;
@@ -23,16 +24,16 @@ import java.util.stream.Collectors;
  * @see DependencyDefinition
  */
 record DependencyGroupDefinition(GroupRequirement requirement, boolean inverted, boolean tooltip, Set<DependencyDefinition> children) {
-    DependencyGroupDefinition(String i18nBase, EnableIfGroup annotation) {
+    DependencyGroupDefinition(Class<? extends ConfigData> configClass, EnableIfGroup annotation) {
         this(annotation.condition(), annotation.inverted(), annotation.tooltip(),
                 Arrays.stream(annotation.value())
-                        .map(child -> new DependencyDefinition(i18nBase, child))
+                        .map(child -> new DependencyDefinition(configClass, child))
                         .collect(Collectors.toUnmodifiableSet()));
     }
-    DependencyGroupDefinition(String i18nBase, ShowIfGroup annotation) {
+    DependencyGroupDefinition(Class<? extends ConfigData> configClass, ShowIfGroup annotation) {
         this(annotation.condition(), annotation.inverted(), annotation.tooltip(),
                 Arrays.stream(annotation.value())
-                        .map(child -> new DependencyDefinition(i18nBase, child))
+                        .map(child -> new DependencyDefinition(configClass, child))
                         .collect(Collectors.toUnmodifiableSet()));
     }
     
