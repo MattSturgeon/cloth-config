@@ -24,21 +24,22 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.clothconfig2.api.dependencies.Dependency;
 import me.shedaniel.clothconfig2.gui.AbstractConfigScreen;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -53,6 +54,9 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
     private int cacheFieldNameHash = -1;
     private List<String> cachedTags = null;
     private Iterable<String> additionalSearchTags = null;
+    
+    @Nullable private Dependency enableDependency = null;
+    @Nullable private Dependency displayDependency = null;
     
     public final void setReferenceProviderEntries(@Nullable List<ReferenceProvider<?>> referencableEntries) {
         this.referencableEntries = referencableEntries;
@@ -92,7 +96,47 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
             text = text.withStyle(ChatFormatting.ITALIC);
         if (!hasError && !isEdited)
             text = text.withStyle(ChatFormatting.GRAY);
+        if (!isEnabled())
+            text = text.withStyle(ChatFormatting.DARK_GRAY);
         return text;
+    }
+    
+    /**
+     * True if no "enabled" predicate is set, otherwise true if the predicate is true for the current value.
+     * <p>
+     * Never true if {@link #isDisplayed()} is false.
+     * 
+     * @return whether the config entry is enabled
+     * @see #isDisplayed() 
+     */
+    public boolean isEnabled() {
+        return isDisplayed() && (enableDependency == null || enableDependency.check());
+    }
+    
+    /**
+     * True if no "display" predicate is set, otherwise true if the predicate is true for the current value.
+     *
+     * @return whether to display the config entry
+     * @see #isEnabled()
+     */
+    public boolean isDisplayed() {
+        return displayDependency == null || displayDependency.check();
+    }
+    
+    public void setEnabledDependency(@Nullable Dependency dependency) {
+        this.enableDependency = dependency;
+    }
+    
+    public @Nullable Dependency getEnableDependency() {
+        return enableDependency;
+    }
+    
+    public void setDisplayDependency(@Nullable Dependency dependency) {
+        this.displayDependency = dependency;
+    }
+    
+    public @Nullable Dependency getDisplayDependency() {
+        return displayDependency;
     }
     
     public Iterator<String> getSearchTags() {
@@ -144,6 +188,19 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
     
     public final void addTooltip(@NotNull Tooltip tooltip) {
         screen.addTooltip(tooltip);
+    }
+    
+    protected FormattedCharSequence[] wrapLinesToScreen(Component[] lines) {
+        return wrapLines(lines, screen.width);
+    }
+    
+    protected FormattedCharSequence[] wrapLines(Component[] lines, int width) {
+        final Font font = Minecraft.getInstance().font;
+        
+        return Arrays.stream(lines)
+                .map(line -> font.split(line, width))
+                .flatMap(List::stream)
+                .toArray(FormattedCharSequence[]::new);
     }
     
     public void updateSelected(boolean isSelected) {}

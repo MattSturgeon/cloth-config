@@ -25,15 +25,14 @@ import me.shedaniel.clothconfig2.api.Tooltip;
 import me.shedaniel.math.Point;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
 public abstract class TooltipListEntry<T> extends AbstractConfigListEntry<T> {
@@ -55,25 +54,32 @@ public abstract class TooltipListEntry<T> extends AbstractConfigListEntry<T> {
     @Override
     public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isHovered, delta);
-        if (isMouseInside(mouseX, mouseY, x, y, entryWidth, entryHeight)) {
-            Optional<Component[]> tooltip = getTooltip(mouseX, mouseY);
-            if (tooltip.isPresent() && tooltip.get().length > 0)
-                addTooltip(Tooltip.of(new Point(mouseX, mouseY), postProcessTooltip(tooltip.get())));
-        }
+        if (isMouseInside(mouseX, mouseY, x, y, entryWidth, entryHeight))
+            handleTooltip(mouseX, mouseY);
     }
     
-    private FormattedCharSequence[] postProcessTooltip(Component[] tooltip) {
-        return Arrays.stream(tooltip).flatMap(component -> Minecraft.getInstance().font.split(component, getConfigScreen().width).stream())
-                .toArray(FormattedCharSequence[]::new);
+    private void handleTooltip(int mouseX, int mouseY) {
+        Component[] lines = getTooltip(mouseX, mouseY);
+        if (lines.length < 1)
+            return;
+        
+        Tooltip tooltip = Tooltip.of(new Point(mouseX, mouseY), wrapLinesToScreen(lines));
+        this.addTooltip(tooltip);
     }
     
-    public Optional<Component[]> getTooltip() {
-        if (tooltipSupplier != null)
-            return tooltipSupplier.get();
-        return Optional.empty();
+    public Component[] getTooltip() {
+        Stream<Component> tooltipStream = Stream.ofNullable(tooltipSupplier)
+                .map(Supplier::get)
+                .flatMap(Optional::stream)
+                .flatMap(Arrays::stream);
+        
+        @Nullable Component disabled = this.isEnabled() ? null : Component.translatable("text.cloth-config.dependencies.disabled_tooltip");
+        
+        return Stream.concat(tooltipStream, Stream.ofNullable(disabled))
+                .toArray(Component[]::new);
     }
     
-    public Optional<Component[]> getTooltip(int mouseX, int mouseY) {
+    public Component[] getTooltip(int mouseX, int mouseY) {
         return getTooltip();
     }
     
@@ -85,5 +91,4 @@ public abstract class TooltipListEntry<T> extends AbstractConfigListEntry<T> {
     public void setTooltipSupplier(@Nullable Supplier<Optional<Component[]>> tooltipSupplier) {
         this.tooltipSupplier = tooltipSupplier;
     }
-    
 }
