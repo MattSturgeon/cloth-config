@@ -20,7 +20,7 @@
 package me.shedaniel.clothconfig2.impl.builders;
 
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
-import me.shedaniel.clothconfig2.api.dependencies.Dependency;
+import me.shedaniel.clothconfig2.api.Requirement;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
@@ -41,8 +41,8 @@ public abstract class FieldBuilder<T, A extends AbstractConfigListEntry, SELF ex
     protected boolean requireRestart = false;
     @Nullable protected Supplier<T> defaultValue = null;
     @Nullable protected Function<T, Optional<Component>> errorSupplier;
-    @Nullable protected Dependency enableDependency = null;
-    @Nullable protected Dependency displayDependency = null;
+    @Nullable protected Requirement enableRequirement = null;
+    @Nullable protected Requirement displayRequirement = null;
     
     protected FieldBuilder(Component resetButtonKey, Component fieldNameKey) {
         this.resetButtonKey = Objects.requireNonNull(resetButtonKey);
@@ -75,10 +75,10 @@ public abstract class FieldBuilder<T, A extends AbstractConfigListEntry, SELF ex
     protected A finishBuilding(A field) {
         if (field == null)
             return null;
-        if (enableDependency != null)
-            field.setEnabledDependency(enableDependency);
-        if (displayDependency != null)
-            field.setDisplayDependency(displayDependency);
+        if (enableRequirement != null)
+            field.setEnabledDependency(enableRequirement);
+        if (displayRequirement != null)
+            field.setDisplayDependency(displayRequirement);
         return field;
     }
     
@@ -106,14 +106,14 @@ public abstract class FieldBuilder<T, A extends AbstractConfigListEntry, SELF ex
      * If an "enabled" dependency is already set, it will be overwritten. The dependency will be tested
      * using the config entry's value.
      *
-     * @param dependency the dependency controls whether the config entry is enabled
+     * @param requirement the dependency controls whether the config entry is enabled
      * @return this instance, for chaining
      * @see Predicate 
      */
     @Contract(mutates = "this")
     @SuppressWarnings("unchecked")
-    public final SELF setEnableDependency(Dependency dependency) {
-        enableDependency = dependency;
+    public final SELF setEnableDependency(Requirement requirement) {
+        enableRequirement = requirement;
         return (SELF) this;
     }
     
@@ -122,14 +122,14 @@ public abstract class FieldBuilder<T, A extends AbstractConfigListEntry, SELF ex
      * <br><br>
      * If a "display" dependency is already set, it will be overwritten.
      * 
-     * @param dependency the dependency controls whether the config entry is displayed
+     * @param requirement the dependency controls whether the config entry is displayed
      * @return this instance, for chaining
      * @see Predicate 
      */
     @Contract(mutates = "this")
     @SuppressWarnings("unchecked")
-    public final SELF setDisplayDependency(Dependency dependency) {
-        displayDependency = dependency;
+    public final SELF setDisplayDependency(Requirement requirement) {
+        displayRequirement = requirement;
         return (SELF) this;
     }
 }

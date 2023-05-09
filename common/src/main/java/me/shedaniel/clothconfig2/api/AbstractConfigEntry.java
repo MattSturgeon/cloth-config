@@ -24,7 +24,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.api.dependencies.Dependency;
 import me.shedaniel.clothconfig2.gui.AbstractConfigScreen;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import net.fabricmc.api.EnvType;
@@ -55,8 +54,8 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
     private List<String> cachedTags = null;
     private Iterable<String> additionalSearchTags = null;
     
-    @Nullable private Dependency enableDependency = null;
-    @Nullable private Dependency displayDependency = null;
+    @Nullable private Requirement enableRequirement = null;
+    @Nullable private Requirement displayRequirement = null;
     
     public final void setReferenceProviderEntries(@Nullable List<ReferenceProvider<?>> referencableEntries) {
         this.referencableEntries = referencableEntries;
@@ -110,7 +109,7 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
      * @see #isDisplayed() 
      */
     public boolean isEnabled() {
-        return isDisplayed() && (enableDependency == null || enableDependency.check());
+        return isDisplayed() && (enableRequirement == null || enableRequirement.check());
     }
     
     /**
@@ -120,23 +119,23 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
      * @see #isEnabled()
      */
     public boolean isDisplayed() {
-        return displayDependency == null || displayDependency.check();
+        return displayRequirement == null || displayRequirement.check();
     }
     
-    public void setEnabledDependency(@Nullable Dependency dependency) {
-        this.enableDependency = dependency;
+    public void setEnabledDependency(@Nullable Requirement requirement) {
+        this.enableRequirement = requirement;
     }
     
-    public @Nullable Dependency getEnableDependency() {
-        return enableDependency;
+    public @Nullable Requirement getEnableDependency() {
+        return enableRequirement;
     }
     
-    public void setDisplayDependency(@Nullable Dependency dependency) {
-        this.displayDependency = dependency;
+    public void setDisplayDependency(@Nullable Requirement requirement) {
+        this.displayRequirement = requirement;
     }
     
-    public @Nullable Dependency getDisplayDependency() {
-        return displayDependency;
+    public @Nullable Requirement getDisplayDependency() {
+        return displayRequirement;
     }
     
     public Iterator<String> getSearchTags() {
