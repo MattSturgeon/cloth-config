@@ -39,11 +39,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
-public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.ElementEntry<AbstractConfigEntry<T>> implements ReferenceProvider<T>, ValueHolder<T> {
+public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.ElementEntry<AbstractConfigEntry<T>> implements TickableWidget, ReferenceProvider<T>, ValueHolder<T> {
     private AbstractConfigScreen screen;
     private Supplier<Optional<Component>> errorSupplier;
     @Nullable
@@ -57,6 +58,9 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
     @Nullable private Requirement enableRequirement = null;
     @Nullable private Requirement displayRequirement = null;
     
+    private final AtomicBoolean enabled = new AtomicBoolean(true);
+    private final AtomicBoolean displayed = new AtomicBoolean(true);
+   
     public final void setReferenceProviderEntries(@Nullable List<ReferenceProvider<?>> referencableEntries) {
         this.referencableEntries = referencableEntries;
     }
@@ -101,25 +105,33 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
     }
     
     /**
-     * True if no "enabled" predicate is set, otherwise true if the predicate is true for the current value.
-     * <p>
-     * Never true if {@link #isDisplayed()} is false.
+     * Checks whether this config entry gui is enabled.
+     * 
+     * <p>Requirements are checked independently (once per tick). This method simply reads the result of the latest
+     * check, making it extremely cheap to run.
+     * 
+     * <p>If {@link #isDisplayed()} is false, this will also be false.
      * 
      * @return whether the config entry is enabled
-     * @see #isDisplayed() 
+     * @see #isDisplayed()
+     * @see #tick()
      */
     public boolean isEnabled() {
-        return isDisplayed() && (enableRequirement == null || enableRequirement.check());
+        return isDisplayed() && enabled.get();
     }
     
     /**
-     * True if no "display" predicate is set, otherwise true if the predicate is true for the current value.
-     *
+     * Checks whether this config entry gui is shown on screen.
+     * 
+     * <p>Requirements are checked independently (once per tick). This method simply reads the result of the latest
+     * check, making it extremely cheap to run.
+     * 
      * @return whether to display the config entry
      * @see #isEnabled()
+     * @see #tick()
      */
     public boolean isDisplayed() {
-        return displayRequirement == null || displayRequirement.check();
+        return displayed.get();
     }
     
     public void setEnabledDependency(@Nullable Requirement requirement) {
@@ -136,6 +148,13 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
     
     public @Nullable Requirement getDisplayDependency() {
         return displayRequirement;
+    }
+    
+    @Override
+    public void tick() {
+        // Check requirements
+        enabled.getAndSet(enableRequirement == null || enableRequirement.check());
+        displayed.getAndSet(displayRequirement == null || displayRequirement.check());
     }
     
     public Iterator<String> getSearchTags() {

@@ -25,6 +25,7 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.api.AbstractConfigEntry;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.api.TickableWidget;
 import me.shedaniel.math.Rectangle;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -49,7 +50,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
-public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.Entry<E>> extends AbstractContainerEventHandler implements Widget, NarratableEntry {
+public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.Entry<E>> extends AbstractContainerEventHandler implements TickableWidget, Widget, NarratableEntry {
     protected static final int DRAG_OUTSIDE = -2;
     protected final Minecraft client;
     private final List<E> entries = new Entries();
@@ -229,6 +230,13 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
     }
     
     protected void clickedHeader(int int_1, int int_2) {
+    }
+    
+    @Override
+    public void tick() {
+        for (E child : this.children()) {
+           child.tick();
+        }
     }
     
     protected void renderHeader(PoseStack matrices, int rowLeft, int startY, Tesselator tessellator) {
@@ -558,7 +566,7 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
     }
     
     @Environment(EnvType.CLIENT)
-    public abstract static class Entry<E extends Entry<E>> extends GuiComponent implements GuiEventListener {
+    public abstract static class Entry<E extends Entry<E>> extends GuiComponent implements GuiEventListener, TickableWidget {
         @Deprecated DynamicEntryListWidget<E> parent;
         @Nullable
         private NarratableEntry lastNarratable;

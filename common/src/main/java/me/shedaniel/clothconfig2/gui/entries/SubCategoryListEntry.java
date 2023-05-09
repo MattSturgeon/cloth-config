@@ -147,6 +147,14 @@ public class SubCategoryListEntry extends TooltipListEntry<List<AbstractConfigLi
     }
     
     @Override
+    public void tick() {
+        super.tick();
+        for (AbstractConfigListEntry<?> entry : entries) {
+           entry.tick(); 
+        }
+    }
+    
+    @Override
     public void updateSelected(boolean isSelected) {
         for (AbstractConfigListEntry<?> entry : entries) {
             entry.updateSelected(isExpanded() && isSelected && getFocused() == entry && entry.isDisplayed() && getConfigScreen().matchesSearch(entry.getSearchTags()));
