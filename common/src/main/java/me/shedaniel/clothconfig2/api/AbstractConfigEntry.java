@@ -43,7 +43,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
-public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.ElementEntry<AbstractConfigEntry<T>> implements ReferenceProvider<T> {
+public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.ElementEntry<AbstractConfigEntry<T>> implements ReferenceProvider<T>, ValueHolder<T> {
     private AbstractConfigScreen screen;
     private Supplier<Optional<Component>> errorSupplier;
     @Nullable
@@ -159,8 +159,6 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
             this.additionalSearchTags = Iterables.concat(this.additionalSearchTags, tags);
         }
     }
-    
-    public abstract T getValue();
     
     public final Optional<Component> getConfigError() {
         if (errorSupplier != null && errorSupplier.get().isPresent())

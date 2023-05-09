@@ -22,35 +22,35 @@ public interface Requirement {
     boolean check();
     
     /**
-     * Generates a {@link Requirement} that is true when {@code gui}'s value is one of the provided values.
+     * Generates a {@link Requirement} that is true when {@code dependency}'s value is one of the provided values.
      */
     @SafeVarargs
-    static <T> @NotNull Requirement isValue(AbstractConfigEntry<T> gui, T firstValue, T... otherValues) {
+    static <T> @NotNull Requirement isValue(ValueHolder<T> dependency, T firstValue, T... otherValues) {
         Set<T> values = Stream.concat(Stream.of(firstValue), Arrays.stream(otherValues))
                 .collect(Collectors.toUnmodifiableSet());
         
-        return () -> values.contains(gui.getValue());
+        return () -> values.contains(dependency.getValue());
     }
     
     /**
-     * Generates a {@link Requirement} that is true when {@code firstGui}'s value equals {@code secondGui}'s value.
+     * Generates a {@link Requirement} that is true when {@code firstDependency}'s value equals {@code secondDependency}'s value.
      */
-    static @NotNull <T> Requirement matches(AbstractConfigEntry<T> firstGui, AbstractConfigEntry<T> secondGui) {
-        return () -> firstGui.getValue().equals(secondGui.getValue());
+    static @NotNull <T> Requirement matches(ValueHolder<T> firstDependency, ValueHolder<T> secondDependency) {
+        return () -> firstDependency.getValue().equals(secondDependency.getValue());
     }
     
     /**
-     * Generates a {@link Requirement} that is true when {@code gui}'s value is true.
+     * Generates a {@link Requirement} that is true when {@code dependency}'s value is true.
      */
-    static @NotNull Requirement isTrue(AbstractConfigEntry<Boolean> gui) {
-        return gui::getValue;
+    static @NotNull Requirement isTrue(ValueHolder<Boolean> dependency) {
+        return dependency::getValue;
     }
     
     /**
-     * Generates a {@link Requirement} that is true when {@code gui}'s value is false.
+     * Generates a {@link Requirement} that is true when {@code dependency}'s value is false.
      */
-    static @NotNull Requirement isFalse(AbstractConfigEntry<Boolean> gui) {
-        return () -> !gui.getValue();
+    static @NotNull Requirement isFalse(ValueHolder<Boolean> dependency) {
+        return () -> !dependency.getValue();
     }
     
     /**
