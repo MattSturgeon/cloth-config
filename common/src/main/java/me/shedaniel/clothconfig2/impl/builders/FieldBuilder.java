@@ -31,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
@@ -68,18 +67,18 @@ public abstract class FieldBuilder<T, A extends AbstractConfigListEntry, SELF ex
      * <br><br>
      * Should be used by implementations of {@link #build()}.
      *
-     * @param field the config entry to finish building
-     * @return the finished config entry
+     * @param gui the config entry to finish building
+     * @return the mutated config entry
      */
     @Contract(value = "_ -> param1", mutates = "param1")
-    protected A finishBuilding(A field) {
-        if (field == null)
+    protected A finishBuilding(A gui) {
+        if (gui == null)
             return null;
         if (enableRequirement != null)
-            field.setEnabledDependency(enableRequirement);
+            gui.setRequirement(enableRequirement);
         if (displayRequirement != null)
-            field.setDisplayDependency(displayRequirement);
-        return field;
+            gui.setDisplayRequirement(displayRequirement);
+        return gui;
     }
     
     @NotNull
@@ -101,35 +100,36 @@ public abstract class FieldBuilder<T, A extends AbstractConfigListEntry, SELF ex
     }
     
     /**
-     * Defines a dependency that controls whether the built config entry is enabled.
-     * <br><br>
-     * If an "enabled" dependency is already set, it will be overwritten. The dependency will be tested
-     * using the config entry's value.
+     * Set a requirement that controls whether the config entry gui is enabled.
+     * 
+     * <p>If an enablement requirement is already set, it will be overwritten.
+     * 
+     * <p>If the requirement returns {@code true}, the config entry will be enabled.
+     *    If the requirement returns {@code false}, the config entry will be disabled.
      *
-     * @param requirement the dependency controls whether the config entry is enabled
-     * @return this instance, for chaining
-     * @see Predicate 
+     * @see Requirement 
      */
     @Contract(mutates = "this")
-    @SuppressWarnings("unchecked")
-    public final SELF setEnableDependency(Requirement requirement) {
+    public final SELF setRequirement(Requirement requirement) {
+        @SuppressWarnings("unchecked") SELF self = (SELF) this;
         enableRequirement = requirement;
-        return (SELF) this;
+        return self;
     }
     
     /**
-     * Defines a dependency that controls whether the built config entry is displayed.
-     * <br><br>
-     * If a "display" dependency is already set, it will be overwritten.
+     * Set a requirement that controls whether the config entry gui is displayed.
+     *
+     * <p>If a display requirement is already set, it will be overwritten.
      * 
-     * @param requirement the dependency controls whether the config entry is displayed
-     * @return this instance, for chaining
-     * @see Predicate 
+     * <p>If the requirement returns {@code true}, the config entry will be displayed.
+     *    If the requirement returns {@code false}, the config entry will be hidden.
+     *
+     * @see Requirement 
      */
     @Contract(mutates = "this")
-    @SuppressWarnings("unchecked")
-    public final SELF setDisplayDependency(Requirement requirement) {
+    public final SELF setDisplayRequirement(Requirement requirement) {
+        @SuppressWarnings("unchecked") SELF self = (SELF) this;
         displayRequirement = requirement;
-        return (SELF) this;
+        return self;
     }
 }

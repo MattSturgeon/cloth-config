@@ -73,7 +73,7 @@ public abstract class TooltipListEntry<T> extends AbstractConfigListEntry<T> {
                 .flatMap(Optional::stream)
                 .flatMap(Arrays::stream);
         
-        @Nullable Component disabled = this.isEnabled() ? null : Component.translatable("text.cloth-config.dependencies.disabled_tooltip");
+        @Nullable Component disabled = this.isEnabled() ? null : Component.translatable("text.cloth-config.disabled_tooltip");
         
         return Stream.concat(tooltipStream, Stream.ofNullable(disabled))
                 .toArray(Component[]::new);

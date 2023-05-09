@@ -134,19 +134,19 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
         return displayed.get();
     }
     
-    public void setEnabledDependency(@Nullable Requirement requirement) {
+    public void setRequirement(@Nullable Requirement requirement) {
         this.enableRequirement = requirement;
     }
     
-    public @Nullable Requirement getEnableDependency() {
+    public @Nullable Requirement getRequirement() {
         return enableRequirement;
     }
     
-    public void setDisplayDependency(@Nullable Requirement requirement) {
+    public void setDisplayRequirement(@Nullable Requirement requirement) {
         this.displayRequirement = requirement;
     }
     
-    public @Nullable Requirement getDisplayDependency() {
+    public @Nullable Requirement getDisplayRequirement() {
         return displayRequirement;
     }
     

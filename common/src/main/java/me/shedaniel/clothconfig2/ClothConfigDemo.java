@@ -163,39 +163,39 @@ public class ClothConfigDemo {
         depends.add(dependency);
         Collection<BooleanListEntry> toggles = new LinkedList<>();
         toggles.add(entryBuilder.startBooleanToggle(Component.literal("I only work when cool is toggled..."), true)
-                .setEnableDependency(Requirement.isTrue(dependency)).build());
+                .setRequirement(Requirement.isTrue(dependency)).build());
         toggles.add(entryBuilder.startBooleanToggle(Component.literal("I only appear when cool is toggled..."), true)
-                .setDisplayDependency(Requirement.isTrue(dependency)).build());
+                .setDisplayRequirement(Requirement.isTrue(dependency)).build());
         depends.addAll(toggles);
         depends.add(entryBuilder.startBooleanToggle(Component.literal("I only work when cool matches both of these toggles ^^"), true)
-                .setEnableDependency(Requirement.all(
+                .setRequirement(Requirement.all(
                         toggles.stream()
                                 .map(toggle -> Requirement.matches(dependency, toggle))
                                 .toArray(Requirement[]::new)))
                 .build());
         SubCategoryBuilder dependantSub = entryBuilder.startSubCategory(Component.literal("Sub-categories can have requirements too..."))
-                .setEnableDependency(Requirement.isTrue(dependency));
+                .setRequirement(Requirement.isTrue(dependency));
         dependantSub.add(entryBuilder.startTextDescription(Component.literal("This sub category depends on Cool being toggled")).build());
         dependantSub.add(entryBuilder.startBooleanToggle(Component.literal("Example entry"), true).build());
         dependantSub.add(entryBuilder.startBooleanToggle(Component.literal("Another example..."), true).build());
         depends.add(dependantSub.build());
         depends.add(entryBuilder.startLongList(Component.literal("Even lists!"), Arrays.asList(1L, 2L, 3L)).setDefaultValue(Arrays.asList(1L, 2L, 3L))
-                .setEnableDependency(Requirement.isTrue(dependency)).build());
+                .setRequirement(Requirement.isTrue(dependency)).build());
         EnumListEntry<DependencyDemoEnum> enumDependency = entryBuilder.startEnumSelector(Component.literal("Select a good or bad option"), DependencyDemoEnum.class, DependencyDemoEnum.OKAY).build();
         depends.add(enumDependency);
         IntegerSliderEntry intDependency = entryBuilder.startIntSlider(Component.literal("Select something big or small"), 50, -100, 100).build();
         depends.add(intDependency);
         depends.add(entryBuilder.startBooleanToggle(Component.literal("I only work when a good option is chosen..."), true).setTooltip(Component.literal("Select good or better above"))
-                .setEnableDependency(Requirement.isValue(enumDependency, DependencyDemoEnum.EXCELLENT, DependencyDemoEnum.GOOD))
+                .setRequirement(Requirement.isValue(enumDependency, DependencyDemoEnum.EXCELLENT, DependencyDemoEnum.GOOD))
                 .build());
         depends.add(entryBuilder.startBooleanToggle(Component.literal("I need a good option AND a cool toggle!"), true).setTooltip(Component.literal("Select good or better and also toggle cool"))
-                .setEnableDependency(Requirement.all(
+                .setRequirement(Requirement.all(
                         Requirement.isTrue(dependency),
                         Requirement.isValue(enumDependency, DependencyDemoEnum.EXCELLENT, DependencyDemoEnum.GOOD)))
                 .build());
         depends.add(entryBuilder.startBooleanToggle(Component.literal("I only work when numbers are awesome!"), true)
                 .setTooltip(Component.literal("Move the slider above..."))
-                .setEnableDependency(Requirement.any(
+                .setRequirement(Requirement.any(
                         () -> intDependency.getValue() < -70,
                         () -> intDependency.getValue() > 70))
                 .build());
