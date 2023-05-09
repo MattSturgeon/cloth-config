@@ -173,13 +173,13 @@ public class ClothConfigDemo {
                                 .map(toggle -> Requirement.matches(dependency, toggle))
                                 .toArray(Requirement[]::new)))
                 .build());
-        SubCategoryBuilder dependantSub = entryBuilder.startSubCategory(Component.literal("How do deps work with sub-categories?"))
+        SubCategoryBuilder dependantSub = entryBuilder.startSubCategory(Component.literal("Sub-categories can have requirements too..."))
                 .setEnableDependency(Requirement.isTrue(dependency));
         dependantSub.add(entryBuilder.startTextDescription(Component.literal("This sub category depends on Cool being toggled")).build());
         dependantSub.add(entryBuilder.startBooleanToggle(Component.literal("Example entry"), true).build());
         dependantSub.add(entryBuilder.startBooleanToggle(Component.literal("Another example..."), true).build());
         depends.add(dependantSub.build());
-        depends.add(entryBuilder.startLongList(Component.literal("A list of Longs"), Arrays.asList(1L, 2L, 3L)).setDefaultValue(Arrays.asList(1L, 2L, 3L))
+        depends.add(entryBuilder.startLongList(Component.literal("Even lists!"), Arrays.asList(1L, 2L, 3L)).setDefaultValue(Arrays.asList(1L, 2L, 3L))
                 .setEnableDependency(Requirement.isTrue(dependency)).build());
         EnumListEntry<DependencyDemoEnum> enumDependency = entryBuilder.startEnumSelector(Component.literal("Select a good or bad option"), DependencyDemoEnum.class, DependencyDemoEnum.OKAY).build();
         depends.add(enumDependency);
@@ -201,11 +201,7 @@ public class ClothConfigDemo {
                 .build());
     
         testing.addEntry(depends.build());
-        testing.addEntry(entryBuilder.startBooleanToggle(Component.literal("I appear when bad option is chosen..."), true)
-                .setDisplayDependency(Requirement.isValue(enumDependency, DependencyDemoEnum.HORRIBLE, DependencyDemoEnum.BAD))
-                .setTooltip(Component.literal("Hopefully I keep my index"))
-                .build());
-        
+       
         testing.addEntry(entryBuilder.startTextDescription(
                 Component.translatable("text.cloth-config.testing.1",
                         Component.literal("ClothConfig").withStyle(s -> s.withBold(true).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(Util.make(new ItemStack(Items.PINK_WOOL), stack -> stack.setHoverName(Component.literal("(\u30FB\u2200\u30FB)")).enchant(Enchantments.BLOCK_EFFICIENCY, 10)))))),
