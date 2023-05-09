@@ -193,8 +193,8 @@ public class ClothConfigDemo {
                         Requirement.isTrue(dependency),
                         Requirement.isValue(enumDependency, DependencyDemoEnum.EXCELLENT, DependencyDemoEnum.GOOD)))
                 .build());
-        depends.add(entryBuilder.startBooleanToggle(Component.literal("I only work when numbers are awesome!"), true)
-                .setTooltip(Component.literal("Move the slider above..."))
+        depends.add(entryBuilder.startBooleanToggle(Component.literal("I only work when numbers are extreme!"), true)
+                .setTooltip(Component.literal("Move the slider..."))
                 .setRequirement(Requirement.any(
                         () -> intDependency.getValue() < -70,
                         () -> intDependency.getValue() > 70))
