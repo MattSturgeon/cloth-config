@@ -492,20 +492,22 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
     }
     
     protected void renderList(PoseStack matrices, int startX, int startY, int mouseX, int mouseY, float delta) {
-        hoveredItem = this.isMouseOver(mouseX, mouseY) ? this.getItemAtPosition(mouseX, mouseY) : null;
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
         
-        int renderIndex = 0;
+        hoveredItem = this.isMouseOver(mouseX, mouseY) ? this.getItemAtPosition(mouseX, mouseY) : null;
+        
+        int heights = 0; // itemHeight accumulator
+        int renderIndex = 0; // index is passed to render methods
         for (E item : visibleChildren()) {
-            int itemY = startY + headerHeight;
-            for (E elm : visibleChildren()) {
-                itemY += elm.getItemHeight();
-            }
+            int itemY = startY + headerHeight + heights;
             int itemHeight = item.getItemHeight() - 4;
             int itemWidth = this.getItemWidth();
             int itemMinX, itemMaxX;
-            if (this.selectionVisible && this.isSelected(renderIndex)) {
+            boolean itemHovered = Objects.equals(this.hoveredItem, item);
+            
+            // if item is selected
+            if (this.selectionVisible && Objects.equals(this.selectedItem, item)) {
                 itemMinX = this.left + this.width / 2 - itemWidth / 2;
                 itemMaxX = itemMinX + itemWidth;
                 RenderSystem.disableTexture();
@@ -525,9 +527,13 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
                 RenderSystem.enableTexture();
             }
             
+            // Finally, call render
             int y = this.getRowTop(renderIndex);
             int x = this.getRowLeft();
-            renderItem(matrices, item, renderIndex, y, x, itemWidth, itemHeight, mouseX, mouseY, Objects.equals(hoveredItem, item), delta);
+            renderItem(matrices, item, renderIndex, y, x, itemWidth, itemHeight, mouseX, mouseY, itemHovered, delta);
+            
+            // Update counter and accumulator
+            heights += item.getItemHeight();
             renderIndex++;
         }
     }
