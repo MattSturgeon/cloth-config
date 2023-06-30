@@ -22,6 +22,7 @@ package me.shedaniel.clothconfig2.gui.entries;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.clothconfig2.api.NotNullValueHolder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -31,6 +32,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +41,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
-public class BooleanListEntry extends TooltipListEntry<Boolean> {
+public class BooleanListEntry extends TooltipListEntry<Boolean> implements NotNullValueHolder<Boolean> {
     
     private final AtomicBoolean bool;
     private final boolean original;
@@ -83,7 +85,7 @@ public class BooleanListEntry extends TooltipListEntry<Boolean> {
     }
     
     @Override
-    public Boolean getValue() {
+    public @NotNull Boolean getValue() {
         return bool.get();
     }
     

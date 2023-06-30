@@ -23,6 +23,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -68,7 +69,7 @@ public class FloatListEntry extends AbstractNumberListEntry<Float> {
     }
     
     @Override
-    public Float getValue() {
+    public @NotNull Float getValue() {
         try {
             return Float.valueOf(textFieldWidget.getValue());
         } catch (Exception e) {

@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.clothconfig2.api.NotNullValueHolder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -43,7 +44,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
-public class SelectionListEntry<T> extends TooltipListEntry<T> {
+public class SelectionListEntry<T> extends TooltipListEntry<T> implements NotNullValueHolder<T> {
     
     private final ImmutableList<T> values;
     private final AtomicInteger index;
@@ -102,7 +103,7 @@ public class SelectionListEntry<T> extends TooltipListEntry<T> {
     }
     
     @Override
-    public T getValue() {
+    public @NotNull T getValue() {
         return this.values.get(this.index.get());
     }
     

@@ -22,6 +22,7 @@ package me.shedaniel.clothconfig2.gui.entries;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.clothconfig2.api.NotNullValueHolder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -33,6 +34,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +44,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
-public class IntegerSliderEntry extends TooltipListEntry<Integer> {
+public class IntegerSliderEntry extends TooltipListEntry<Integer> implements NotNullValueHolder<Integer> {
     
     protected Slider sliderWidget;
     protected Button resetButton;
@@ -94,7 +96,7 @@ public class IntegerSliderEntry extends TooltipListEntry<Integer> {
     }
     
     @Override
-    public Integer getValue() {
+    public @NotNull Integer getValue() {
         return value.get();
     }
     

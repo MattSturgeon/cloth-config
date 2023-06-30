@@ -23,6 +23,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -68,7 +69,7 @@ public class DoubleListEntry extends AbstractNumberListEntry<Double> {
     }
     
     @Override
-    public Double getValue() {
+    public @NotNull Double getValue() {
         try {
             return Double.valueOf(textFieldWidget.getValue());
         } catch (Exception e) {
