@@ -268,11 +268,11 @@ public abstract class BaseListEntry<T, C extends BaseListCell, SELF extends Base
     }
     
     @Override
-    public Component[] getTooltip(int mouseX, int mouseY) {
+    public Optional<Component[]> getTooltip(int mouseX, int mouseY) {
         if (addTooltip != null && isInsideCreateNew(mouseX, mouseY))
-            return new Component[]{addTooltip};
+            return Optional.of(new Component[]{addTooltip});
         if (removeTooltip != null && isInsideDelete(mouseX, mouseY))
-            return new Component[]{removeTooltip};
+            return Optional.of(new Component[]{removeTooltip});
         return super.getTooltip(mouseX, mouseY);
     }
     

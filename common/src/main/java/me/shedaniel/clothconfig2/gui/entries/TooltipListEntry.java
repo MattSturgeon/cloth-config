@@ -54,20 +54,14 @@ public abstract class TooltipListEntry<T> extends AbstractConfigListEntry<T> {
     @Override
     public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isHovered, delta);
-        if (isMouseInside(mouseX, mouseY, x, y, entryWidth, entryHeight))
-            handleTooltip(mouseX, mouseY);
+        if (isMouseInside(mouseX, mouseY, x, y, entryWidth, entryHeight)) {
+            getTooltip(mouseX, mouseY)
+                    .map(lines -> Tooltip.of(new Point(mouseX, mouseY), wrapLinesToScreen(lines)))
+                    .ifPresent(this::addTooltip);
+        }
     }
     
-    private void handleTooltip(int mouseX, int mouseY) {
-        Component[] lines = getTooltip(mouseX, mouseY);
-        if (lines.length < 1)
-            return;
-        
-        Tooltip tooltip = Tooltip.of(new Point(mouseX, mouseY), wrapLinesToScreen(lines));
-        this.addTooltip(tooltip);
-    }
-    
-    public Component[] getTooltip() {
+    public Optional<Component[]> getTooltip() {
         Stream<Component> tooltipStream = Stream.ofNullable(tooltipSupplier)
                 .map(Supplier::get)
                 .flatMap(Optional::stream)
@@ -75,11 +69,14 @@ public abstract class TooltipListEntry<T> extends AbstractConfigListEntry<T> {
         
         @Nullable Component disabled = this.isEnabled() ? null : Component.translatable("text.cloth-config.disabled_tooltip");
         
-        return Stream.concat(tooltipStream, Stream.ofNullable(disabled))
+        Component[] lines = Stream.concat(tooltipStream, Stream.ofNullable(disabled))
                 .toArray(Component[]::new);
+        
+        return lines.length < 1 ? Optional.empty() : Optional.of(lines);
+        
     }
     
-    public Component[] getTooltip(int mouseX, int mouseY) {
+    public Optional<Component[]> getTooltip(int mouseX, int mouseY) {
         return getTooltip();
     }
     
