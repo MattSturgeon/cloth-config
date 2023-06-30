@@ -24,6 +24,7 @@ import me.shedaniel.clothconfig2.api.Requirement;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -110,6 +111,7 @@ public abstract class FieldBuilder<T, A extends AbstractConfigListEntry, SELF ex
      * @see Requirement 
      */
     @Contract(mutates = "this")
+    @ApiStatus.Experimental
     public final SELF setRequirement(Requirement requirement) {
         @SuppressWarnings("unchecked") SELF self = (SELF) this;
         enableRequirement = requirement;
@@ -127,6 +129,7 @@ public abstract class FieldBuilder<T, A extends AbstractConfigListEntry, SELF ex
      * @see Requirement 
      */
     @Contract(mutates = "this")
+    @ApiStatus.Experimental
     public final SELF setDisplayRequirement(Requirement requirement) {
         @SuppressWarnings("unchecked") SELF self = (SELF) this;
         displayRequirement = requirement;

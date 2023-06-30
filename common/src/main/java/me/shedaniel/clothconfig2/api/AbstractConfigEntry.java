@@ -116,6 +116,7 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
      * @see #isDisplayed()
      * @see #tick()
      */
+    @ApiStatus.Experimental
     public boolean isEnabled() {
         return isDisplayed() && enabled.get();
     }
@@ -130,27 +131,33 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
      * @see #isEnabled()
      * @see #tick()
      */
+    @ApiStatus.Experimental
     public boolean isDisplayed() {
         return displayed.get();
     }
     
+    @ApiStatus.Experimental
     public void setRequirement(@Nullable Requirement requirement) {
         this.enableRequirement = requirement;
     }
     
+    @ApiStatus.Experimental
     public @Nullable Requirement getRequirement() {
         return enableRequirement;
     }
     
+    @ApiStatus.Experimental
     public void setDisplayRequirement(@Nullable Requirement requirement) {
         this.displayRequirement = requirement;
     }
     
+    @ApiStatus.Experimental
     public @Nullable Requirement getDisplayRequirement() {
         return displayRequirement;
     }
     
     @Override
+    @ApiStatus.Experimental
     public void tick() {
         // Check requirements
         enabled.getAndSet(enableRequirement == null || enableRequirement.check());

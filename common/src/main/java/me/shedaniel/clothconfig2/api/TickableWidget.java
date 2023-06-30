@@ -19,6 +19,10 @@
 
 package me.shedaniel.clothconfig2.api;
 
+import org.jetbrains.annotations.ApiStatus;
+
+@ApiStatus.Experimental
 public interface TickableWidget {
+    @ApiStatus.Experimental
     void tick();
 }
