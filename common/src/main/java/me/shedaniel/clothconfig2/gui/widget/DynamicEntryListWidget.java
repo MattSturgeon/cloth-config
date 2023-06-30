@@ -189,17 +189,29 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
         int minX = listMiddleX - this.getItemWidth() / 2;
         int maxX = listMiddleX + this.getItemWidth() / 2;
         int currentY = Mth.floor(mouseY - (double) this.top) - this.headerHeight + (int) this.getScroll() - 4;
+        
+        // Check if we can return early
+        if ((double) this.getScrollbarPosition() <= mouseX) {
+            return null;
+        } else if (mouseX < minX) {
+            return null;
+        } else if (mouseX > maxX) {
+            return null;
+        } else if (currentY < 0) {
+            return null;
+        }
+        
+        // Otherwise look for the selected item
+        E itemAtPosition = null;
         int itemY = 0;
-        int itemIndex = -1;
-        for (int i = 0; i < getItemCount(); i++) {
-            E item = getItem(i);
+        for (E item : visibleChildren()) {
             itemY += item.getItemHeight();
             if (itemY > currentY) {
-                itemIndex = i;
+                itemAtPosition = item;
                 break;
             }
         }
-        return mouseX < (double) this.getScrollbarPosition() && mouseX >= minX && mouseX <= maxX && itemIndex >= 0 && currentY >= 0 && itemIndex < this.getItemCount() ? this.children().get(itemIndex) : null;
+        return itemAtPosition;
     }
     
     public void updateSize(int width, int height, int top, int bottom) {
@@ -336,10 +348,17 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
     }
     
     protected void centerScrollOn(E item) {
-        double d = (this.bottom - this.top) / -2d;
-        for (int i = 0; i < this.visibleChildren().indexOf(item) && i < this.getItemCount(); i++)
-            d += getItem(i).getItemHeight();
-        this.capYPosition(d);
+        List<E> children = this.visibleChildren();
+        double halfway = (this.bottom - this.top) / -2d;
+        int itemIndex = children.indexOf(item);
+        int i = 0;
+        for (E elm : children) {
+            if (i++ >= itemIndex) {
+                break;
+            }
+            halfway += elm.getItemHeight();
+        }
+        this.capYPosition(halfway);
     }
     
     protected void ensureVisible(E item) {
@@ -456,32 +475,33 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
         }
     }
     
-    protected void moveSelection(int int_1) {
-        if (!this.visibleChildren().isEmpty()) {
-            int int_2 = this.visibleChildren().indexOf(this.getSelectedItem());
-            int int_3 = Mth.clamp(int_2 + int_1, 0, this.getItemCount() - 1);
-            E itemListWidget$Item_1 = this.getItem(int_3);
-            this.selectItem(itemListWidget$Item_1);
-            this.ensureVisible(itemListWidget$Item_1);
+    protected void moveSelection(int shift) {
+        List<E> children = this.visibleChildren();
+        if (children.isEmpty()) {
+            return;
         }
-        
+        int selected = children.indexOf(this.getSelectedItem());
+        int index = Mth.clamp(selected + shift, 0, this.getItemCount() - 1);
+        E item = this.getItem(index);
+        this.selectItem(item);
+        this.ensureVisible(item);
     }
     
     public boolean isMouseOver(double double_1, double double_2) {
         return double_2 >= (double) this.top && double_2 <= (double) this.bottom && double_1 >= (double) this.left && double_1 <= (double) this.right;
     }
     
-    protected void renderList(PoseStack matrices, int startX, int startY, int int_3, int int_4, float float_1) {
-        hoveredItem = this.isMouseOver(int_3, int_4) ? this.getItemAtPosition(int_3, int_4) : null;
-        int itemCount = this.getItemCount();
+    protected void renderList(PoseStack matrices, int startX, int startY, int mouseX, int mouseY, float delta) {
+        hoveredItem = this.isMouseOver(mouseX, mouseY) ? this.getItemAtPosition(mouseX, mouseY) : null;
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
         
-        for (int renderIndex = 0; renderIndex < itemCount; ++renderIndex) {
-            E item = this.getItem(renderIndex);
+        int renderIndex = 0;
+        for (E item : visibleChildren()) {
             int itemY = startY + headerHeight;
-            for (int i = 0; i < getItemCount() && i < renderIndex; i++)
-                itemY += getItem(i).getItemHeight();
+            for (E elm : visibleChildren()) {
+                itemY += elm.getItemHeight();
+            }
             int itemHeight = item.getItemHeight() - 4;
             int itemWidth = this.getItemWidth();
             int itemMinX, itemMaxX;
@@ -507,7 +527,8 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
             
             int y = this.getRowTop(renderIndex);
             int x = this.getRowLeft();
-            renderItem(matrices, item, renderIndex, y, x, itemWidth, itemHeight, int_3, int_4, Objects.equals(hoveredItem, item), float_1);
+            renderItem(matrices, item, renderIndex, y, x, itemWidth, itemHeight, mouseX, mouseY, Objects.equals(hoveredItem, item), delta);
+            renderIndex++;
         }
     }
     
@@ -520,10 +541,15 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
     }
     
     protected int getRowTop(int index) {
-        int integer = top + 4 - (int) this.getScroll() + headerHeight;
-        for (int i = 0; i < getItemCount() && i < index; i++)
-            integer += getItem(i).getItemHeight();
-        return integer;
+        int top = this.top + 4 - (int) this.getScroll() + headerHeight;
+        int i = 0;
+        for (E item : visibleChildren()) {
+            if (index <= i++) {
+                break;
+            }
+            top += item.getItemHeight(); 
+        }
+        return top;
     }
     
     protected boolean isFocused() {
