@@ -39,7 +39,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -58,8 +57,8 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
     @Nullable private Requirement enableRequirement = null;
     @Nullable private Requirement displayRequirement = null;
     
-    private final AtomicBoolean enabled = new AtomicBoolean(true);
-    private final AtomicBoolean displayed = new AtomicBoolean(true);
+    private boolean enabled = true;
+    private boolean displayed = true;
    
     public final void setReferenceProviderEntries(@Nullable List<ReferenceProvider<?>> referencableEntries) {
         this.referencableEntries = referencableEntries;
@@ -118,7 +117,7 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
      */
     @ApiStatus.Experimental
     public boolean isEnabled() {
-        return isDisplayed() && enabled.get();
+        return isDisplayed() && enabled;
     }
     
     /**
@@ -133,7 +132,7 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
      */
     @ApiStatus.Experimental
     public boolean isDisplayed() {
-        return displayed.get();
+        return displayed;
     }
     
     @ApiStatus.Experimental
@@ -160,8 +159,8 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
     @ApiStatus.Experimental
     public void tick() {
         // Check requirements
-        enabled.getAndSet(enableRequirement == null || enableRequirement.check());
-        displayed.getAndSet(displayRequirement == null || displayRequirement.check());
+        enabled = enableRequirement == null || enableRequirement.check();
+        displayed = displayRequirement == null || displayRequirement.check();
     }
     
     public Iterator<String> getSearchTags() {
