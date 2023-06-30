@@ -2,8 +2,11 @@ package me.shedaniel.clothconfig2.api;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,9 +32,9 @@ public interface Requirement {
      */
     @SafeVarargs
     @ApiStatus.Experimental
-    static <T> @NotNull Requirement isValue(ValueHolder<T> dependency, T firstValue, T... otherValues) {
-        Set<T> values = Stream.concat(Stream.of(firstValue), Arrays.stream(otherValues))
-                .collect(Collectors.toUnmodifiableSet());
+    static <T> @NotNull Requirement isValue(@NotNull ValueHolder<T> dependency, @Nullable T firstValue, @Nullable T... otherValues) {
+        Set<@Nullable T> values = Stream.concat(Stream.of(firstValue), Arrays.stream(otherValues))
+                .collect(Collectors.toCollection(HashSet::new));
         
         return () -> values.contains(dependency.getValue());
     }
@@ -40,31 +43,31 @@ public interface Requirement {
      * Generates a {@link Requirement} that is true when {@code firstDependency}'s value equals {@code secondDependency}'s value.
      */
     @ApiStatus.Experimental
-    static @NotNull <T> Requirement matches(ValueHolder<T> firstDependency, ValueHolder<T> secondDependency) {
-        return () -> firstDependency.getValue().equals(secondDependency.getValue());
+    static @NotNull <T> Requirement matches(@NotNull ValueHolder<T> firstDependency, @NotNull ValueHolder<T> secondDependency) {
+        return () -> Objects.equals(firstDependency.getValue(), secondDependency.getValue());
     }
     
     /**
      * Generates a {@link Requirement} that is true when {@code dependency}'s value is true.
      */
     @ApiStatus.Experimental
-    static @NotNull Requirement isTrue(ValueHolder<Boolean> dependency) {
-        return dependency::getValue;
+    static @NotNull Requirement isTrue(@NotNull ValueHolder<Boolean> dependency) {
+        return () -> Boolean.TRUE.equals(dependency.getValue());
     }
     
     /**
      * Generates a {@link Requirement} that is true when {@code dependency}'s value is false.
      */
     @ApiStatus.Experimental
-    static @NotNull Requirement isFalse(ValueHolder<Boolean> dependency) {
-        return () -> !dependency.getValue();
+    static @NotNull Requirement isFalse(@NotNull ValueHolder<Boolean> dependency) {
+        return () -> Boolean.FALSE.equals(dependency.getValue());
     }
     
     /**
      * Generates a {@link Requirement} that is true when the given {@code requirement} is false.
      */
     @ApiStatus.Experimental
-    static Requirement not(Requirement requirement) {
+    static Requirement not(@NotNull Requirement requirement) {
         return () -> !requirement.check();
     }
   
@@ -72,7 +75,7 @@ public interface Requirement {
      * Generates a {@link Requirement} that is true when all the given requirements are true.
      */
     @ApiStatus.Experimental
-    static @NotNull Requirement all(Requirement... requirements) {
+    static @NotNull Requirement all(@NotNull Requirement... requirements) {
         return () -> Arrays.stream(requirements).allMatch(Requirement::check);
     }
     
@@ -80,7 +83,7 @@ public interface Requirement {
      * Generates a {@link Requirement} that is true when any of the given requirements are true.
      */
     @ApiStatus.Experimental
-    static @NotNull Requirement any(Requirement... requirements) {
+    static @NotNull Requirement any(@NotNull Requirement... requirements) {
         return () -> Arrays.stream(requirements).anyMatch(Requirement::check);
     }
     
