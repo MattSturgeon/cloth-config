@@ -42,6 +42,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.AbstractList;
@@ -88,6 +89,7 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
      * 
      * @return an unmodifiable {@link List} of visible entries
      */
+    @ApiStatus.Experimental
     public List<E> visibleChildren() {
         return this.children().stream()
                 .filter(entry -> {
