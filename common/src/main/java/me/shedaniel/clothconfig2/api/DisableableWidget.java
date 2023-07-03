@@ -1,6 +1,7 @@
 package me.shedaniel.clothconfig2.api;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Experimental
 public interface DisableableWidget {
@@ -21,9 +22,9 @@ public interface DisableableWidget {
     boolean isEnabled();
     
     @ApiStatus.Experimental
-    void setRequirement(Requirement requirement);
+    void setRequirement(@Nullable Requirement requirement);
     
     @ApiStatus.Experimental
-    Requirement getRequirement();
+    @Nullable Requirement getRequirement();
     
 }

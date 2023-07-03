@@ -2,6 +2,7 @@ package me.shedaniel.clothconfig2.api;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -31,8 +32,8 @@ public interface Requirement {
      */
     @SafeVarargs
     @ApiStatus.Experimental
-    static <T> @NotNull Requirement isValue(@NotNull ValueHolder<T> dependency, T firstValue, T... otherValues) {
-        Set<T> values = Stream.concat(Stream.of(firstValue), Arrays.stream(otherValues))
+    static <T> @NotNull Requirement isValue(@NotNull ValueHolder<T> dependency, @Nullable T firstValue, @Nullable T... otherValues) {
+        Set<@Nullable T> values = Stream.concat(Stream.of(firstValue), Arrays.stream(otherValues))
                 .collect(Collectors.toCollection(HashSet::new));
         
         return () -> values.contains(dependency.getValue());

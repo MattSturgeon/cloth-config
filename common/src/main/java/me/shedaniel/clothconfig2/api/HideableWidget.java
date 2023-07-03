@@ -1,6 +1,7 @@
 package me.shedaniel.clothconfig2.api;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Experimental
 public interface HideableWidget {
@@ -19,8 +20,8 @@ public interface HideableWidget {
     boolean isDisplayed();
     
     @ApiStatus.Experimental
-    void setDisplayRequirement(Requirement requirement);
+    void setDisplayRequirement(@Nullable Requirement requirement);
     
     @ApiStatus.Experimental
-    Requirement getDisplayRequirement();
+    @Nullable Requirement getDisplayRequirement();
 }

@@ -1,5 +1,7 @@
 package me.shedaniel.clothconfig2.api;
 
+import org.jetbrains.annotations.Nullable;
+
 public interface ValueHolder<T> {
-    T getValue();
+    @Nullable T getValue();
 }
