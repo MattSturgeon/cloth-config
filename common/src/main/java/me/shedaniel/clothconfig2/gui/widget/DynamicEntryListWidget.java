@@ -604,9 +604,7 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
         @Deprecated DynamicEntryListWidget<E> parent;
         @Nullable
         private NarratableEntry lastNarratable;
-        @Nullable
         protected Requirement enableRequirement = null;
-        @Nullable
         protected Requirement displayRequirement = null;
         protected boolean enabled = true;
         protected boolean displayed = true;
@@ -639,22 +637,22 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
         }
         
         @Override
-        public void setRequirement(@Nullable Requirement requirement) {
+        public void setRequirement(Requirement requirement) {
             this.enableRequirement = requirement;
         }
         
         @Override
-        public @Nullable Requirement getRequirement() {
+        public Requirement getRequirement() {
             return enableRequirement;
         }
         
         @Override
-        public void setDisplayRequirement(@Nullable Requirement requirement) {
+        public void setDisplayRequirement(Requirement requirement) {
             this.displayRequirement = requirement;
         }
         
         @Override
-        public @Nullable Requirement getDisplayRequirement() {
+        public Requirement getDisplayRequirement() {
             return displayRequirement;
         }
         
