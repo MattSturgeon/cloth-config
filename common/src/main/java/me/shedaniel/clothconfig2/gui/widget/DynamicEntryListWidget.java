@@ -23,10 +23,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
-import me.shedaniel.clothconfig2.api.DisableableWidget;
-import me.shedaniel.clothconfig2.api.HideableWidget;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.TickableWidget;
+import me.shedaniel.clothconfig2.api.*;
 import me.shedaniel.math.Rectangle;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -607,6 +604,12 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
         @Deprecated DynamicEntryListWidget<E> parent;
         @Nullable
         private NarratableEntry lastNarratable;
+        @Nullable
+        protected Requirement enableRequirement = null;
+        @Nullable
+        protected Requirement displayRequirement = null;
+        protected boolean enabled = true;
+        protected boolean displayed = true;
         
         public Entry() {
         }
@@ -625,6 +628,36 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
             this.parent = parent;
         }
         
+        @Override
+        public boolean isEnabled() {
+            return isDisplayed() && enabled;
+        }
+        
+        @Override
+        public boolean isDisplayed() {
+            return displayed;
+        }
+        
+        @Override
+        public void setRequirement(@Nullable Requirement requirement) {
+            this.enableRequirement = requirement;
+        }
+        
+        @Override
+        public @Nullable Requirement getRequirement() {
+            return enableRequirement;
+        }
+        
+        @Override
+        public void setDisplayRequirement(@Nullable Requirement requirement) {
+            this.displayRequirement = requirement;
+        }
+        
+        @Override
+        public @Nullable Requirement getDisplayRequirement() {
+            return displayRequirement;
+        }
+        
         public abstract int getItemHeight();
         
         @Deprecated
@@ -633,6 +666,13 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
         }
         
         public abstract List<? extends NarratableEntry> narratables();
+        
+        @Override
+        public void tick() {
+            // Check requirements
+            enabled = getRequirement() == null || getRequirement().check();
+            displayed = getDisplayRequirement() == null || getDisplayRequirement().check();
+        }
         
         void updateNarration(NarrationElementOutput narrationElementOutput) {
             List<? extends NarratableEntry> list = this.narratables();

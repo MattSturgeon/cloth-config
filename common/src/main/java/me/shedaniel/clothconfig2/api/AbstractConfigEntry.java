@@ -54,12 +54,6 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
     private List<String> cachedTags = null;
     private Iterable<String> additionalSearchTags = null;
     
-    @Nullable private Requirement enableRequirement = null;
-    @Nullable private Requirement displayRequirement = null;
-    
-    private boolean enabled = true;
-    private boolean displayed = true;
-   
     public final void setReferenceProviderEntries(@Nullable List<ReferenceProvider<?>> referencableEntries) {
         this.referencableEntries = referencableEntries;
     }
@@ -101,50 +95,6 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
         if (!isEnabled())
             text = text.withStyle(ChatFormatting.DARK_GRAY);
         return text;
-    }
-    
-    @Override
-    @ApiStatus.Experimental
-    public boolean isEnabled() {
-        return isDisplayed() && enabled;
-    }
-    
-    @Override
-    @ApiStatus.Experimental
-    public boolean isDisplayed() {
-        return displayed;
-    }
-    
-    @Override
-    @ApiStatus.Experimental
-    public void setRequirement(@Nullable Requirement requirement) {
-        this.enableRequirement = requirement;
-    }
-    
-    @Override
-    @ApiStatus.Experimental
-    public @Nullable Requirement getRequirement() {
-        return enableRequirement;
-    }
-    
-    @Override
-    @ApiStatus.Experimental
-    public void setDisplayRequirement(@Nullable Requirement requirement) {
-        this.displayRequirement = requirement;
-    }
-    
-    @Override
-    @ApiStatus.Experimental
-    public @Nullable Requirement getDisplayRequirement() {
-        return displayRequirement;
-    }
-    
-    @Override
-    @ApiStatus.Experimental
-    public void tick() {
-        // Check requirements
-        enabled = enableRequirement == null || enableRequirement.check();
-        displayed = displayRequirement == null || displayRequirement.check();
     }
     
     public Iterator<String> getSearchTags() {
