@@ -23,7 +23,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -69,7 +68,7 @@ public class LongListEntry extends AbstractNumberListEntry<Long> {
     }
     
     @Override
-    public @NotNull Long getValue() {
+    public Long getValue() {
         try {
             return Long.valueOf(textFieldWidget.getValue());
         } catch (Exception e) {

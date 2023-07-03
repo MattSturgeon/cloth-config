@@ -32,7 +32,7 @@ public interface Requirement {
      */
     @SafeVarargs
     @ApiStatus.Experimental
-    static <T> @NotNull Requirement isValue(@NotNull NullableValueHolder<T> dependency, @Nullable T firstValue, @Nullable T... otherValues) {
+    static <T> @NotNull Requirement isValue(@NotNull ValueHolder<T> dependency, @Nullable T firstValue, @Nullable T... otherValues) {
         Set<@Nullable T> values = Stream.concat(Stream.of(firstValue), Arrays.stream(otherValues))
                 .collect(Collectors.toCollection(HashSet::new));
         
@@ -43,7 +43,7 @@ public interface Requirement {
      * Generates a {@link Requirement} that is true when {@code firstDependency}'s value equals {@code secondDependency}'s value.
      */
     @ApiStatus.Experimental
-    static @NotNull <T> Requirement matches(@NotNull NullableValueHolder<T> firstDependency, @NotNull NullableValueHolder<T> secondDependency) {
+    static @NotNull <T> Requirement matches(@NotNull ValueHolder<T> firstDependency, @NotNull ValueHolder<T> secondDependency) {
         return () -> Objects.equals(firstDependency.getValue(), secondDependency.getValue());
     }
     
@@ -51,7 +51,7 @@ public interface Requirement {
      * Generates a {@link Requirement} that is true when {@code dependency}'s value is true.
      */
     @ApiStatus.Experimental
-    static @NotNull Requirement isTrue(@NotNull NullableValueHolder<Boolean> dependency) {
+    static @NotNull Requirement isTrue(@NotNull ValueHolder<Boolean> dependency) {
         return () -> Boolean.TRUE.equals(dependency.getValue());
     }
     
@@ -59,7 +59,7 @@ public interface Requirement {
      * Generates a {@link Requirement} that is true when {@code dependency}'s value is false.
      */
     @ApiStatus.Experimental
-    static @NotNull Requirement isFalse(@NotNull NullableValueHolder<Boolean> dependency) {
+    static @NotNull Requirement isFalse(@NotNull ValueHolder<Boolean> dependency) {
         return () -> Boolean.FALSE.equals(dependency.getValue());
     }
     

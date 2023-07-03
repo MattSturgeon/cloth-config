@@ -196,8 +196,8 @@ public class ClothConfigDemo {
         depends.add(entryBuilder.startBooleanToggle(Component.literal("I only work when numbers are extreme!"), true)
                 .setTooltip(Component.literal("Move the slider..."))
                 .setRequirement(Requirement.any(
-                        () -> intDependency.getValue() < -70,
-                        () -> intDependency.getValue() > 70))
+                        () -> Optional.ofNullable(intDependency.getValue()).map(value -> value < -70).orElseThrow(),
+                        () -> Optional.ofNullable(intDependency.getValue()).map(value -> value > 70).orElseThrow()))
                 .build());
     
         testing.addEntry(depends.build());

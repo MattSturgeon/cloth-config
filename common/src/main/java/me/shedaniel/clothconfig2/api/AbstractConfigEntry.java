@@ -43,7 +43,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
-public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.ElementEntry<AbstractConfigEntry<T>> implements ReferenceProvider<T>, NullableValueHolder<T> {
+public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.ElementEntry<AbstractConfigEntry<T>> implements ReferenceProvider<T>, ValueHolder<T> {
     private AbstractConfigScreen screen;
     private Supplier<Optional<Component>> errorSupplier;
     @Nullable
