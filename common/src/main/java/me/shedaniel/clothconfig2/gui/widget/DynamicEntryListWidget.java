@@ -23,7 +23,8 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
-import me.shedaniel.clothconfig2.api.AbstractConfigEntry;
+import me.shedaniel.clothconfig2.api.DisableableWidget;
+import me.shedaniel.clothconfig2.api.HideableWidget;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.TickableWidget;
 import me.shedaniel.math.Rectangle;
@@ -92,11 +93,7 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
     @ApiStatus.Experimental
     public List<E> visibleChildren() {
         return this.children().stream()
-                .filter(entry -> {
-                    if (entry instanceof AbstractConfigEntry<?> configEntry)
-                        return configEntry.isDisplayed();
-                    return true;
-                })
+                .filter(HideableWidget::isDisplayed)
                 .toList();
     }
     
@@ -600,7 +597,7 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
     }
     
     @Environment(EnvType.CLIENT)
-    public abstract static class Entry<E extends Entry<E>> extends GuiComponent implements GuiEventListener, TickableWidget {
+    public abstract static class Entry<E extends Entry<E>> extends GuiComponent implements GuiEventListener, TickableWidget, HideableWidget, DisableableWidget {
         @Deprecated DynamicEntryListWidget<E> parent;
         @Nullable
         private NarratableEntry lastNarratable;

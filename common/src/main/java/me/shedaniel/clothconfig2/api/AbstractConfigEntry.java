@@ -43,7 +43,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
-public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.ElementEntry<AbstractConfigEntry<T>> implements TickableWidget, ReferenceProvider<T>, NullableValueHolder<T> {
+public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.ElementEntry<AbstractConfigEntry<T>> implements ReferenceProvider<T>, NullableValueHolder<T> {
     private AbstractConfigScreen screen;
     private Supplier<Optional<Component>> errorSupplier;
     @Nullable
@@ -103,53 +103,37 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
         return text;
     }
     
-    /**
-     * Checks whether this config entry gui is enabled.
-     * 
-     * <p>Requirements are checked independently (once per tick). This method simply reads the result of the latest
-     * check, making it extremely cheap to run.
-     * 
-     * <p>If {@link #isDisplayed()} is false, this will also be false.
-     * 
-     * @return whether the config entry is enabled
-     * @see #isDisplayed()
-     * @see #tick()
-     */
+    @Override
     @ApiStatus.Experimental
     public boolean isEnabled() {
         return isDisplayed() && enabled;
     }
     
-    /**
-     * Checks whether this config entry gui is shown on screen.
-     * 
-     * <p>Requirements are checked independently (once per tick). This method simply reads the result of the latest
-     * check, making it extremely cheap to run.
-     * 
-     * @return whether to display the config entry
-     * @see #isEnabled()
-     * @see #tick()
-     */
+    @Override
     @ApiStatus.Experimental
     public boolean isDisplayed() {
         return displayed;
     }
     
+    @Override
     @ApiStatus.Experimental
     public void setRequirement(@Nullable Requirement requirement) {
         this.enableRequirement = requirement;
     }
     
+    @Override
     @ApiStatus.Experimental
     public @Nullable Requirement getRequirement() {
         return enableRequirement;
     }
     
+    @Override
     @ApiStatus.Experimental
     public void setDisplayRequirement(@Nullable Requirement requirement) {
         this.displayRequirement = requirement;
     }
     
+    @Override
     @ApiStatus.Experimental
     public @Nullable Requirement getDisplayRequirement() {
         return displayRequirement;
