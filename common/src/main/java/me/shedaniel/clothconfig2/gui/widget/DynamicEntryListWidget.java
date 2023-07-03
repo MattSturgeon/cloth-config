@@ -46,16 +46,14 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Environment(EnvType.CLIENT)
 public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.Entry<E>> extends AbstractContainerEventHandler implements TickableWidget, Widget, NarratableEntry {
     protected static final int DRAG_OUTSIDE = -2;
     protected final Minecraft client;
     private final List<E> entries = new Entries();
+    private List<E> visibleEntries = Collections.emptyList();
     public int width;
     public int height;
     public int top;
@@ -88,11 +86,18 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
     /**
      * Get all visible children. I.e. hidden config entries are filtered out.
      * 
+     * <p> Note: this isn't thread safe, since the visible children list is
+     * updated when calling {@link #tick()}.
+     * 
      * @return an unmodifiable {@link List} of visible entries
      */
     @ApiStatus.Experimental
     public List<E> visibleChildren() {
-        return this.children().stream()
+        return this.visibleEntries;
+    }
+    
+    private void updateVisibleChildren() {
+        this.visibleEntries = this.children().stream()
                 .filter(HideableWidget::isDisplayed)
                 .toList();
     }
@@ -245,6 +250,7 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
     
     @Override
     public void tick() {
+        this.updateVisibleChildren();
         for (E child : this.children()) {
            child.tick();
         }
