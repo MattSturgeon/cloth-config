@@ -93,7 +93,7 @@ public class IntListBuilder extends AbstractRangeListBuilder<Integer, IntegerLis
     
     @Override
     public IntListBuilder setSaveConsumer(Consumer<List<Integer>> saveConsumer) {
-        return super.setSaveConsumer(saveConsumer);
+        return (IntListBuilder) super.setSaveConsumer(saveConsumer);
     }
     
     @Override

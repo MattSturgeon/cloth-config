@@ -88,4 +88,5 @@ public abstract class TooltipListEntry<T> extends AbstractConfigListEntry<T> {
     public void setTooltipSupplier(@Nullable Supplier<Optional<Component[]>> tooltipSupplier) {
         this.tooltipSupplier = tooltipSupplier;
     }
+
 }
