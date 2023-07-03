@@ -16,12 +16,9 @@ public interface HideableWidget {
      * @see DisableableWidget#isEnabled()
      * @see TickableWidget#tick()
      */
-    @ApiStatus.Experimental
     boolean isDisplayed();
     
-    @ApiStatus.Experimental
     void setDisplayRequirement(@Nullable Requirement requirement);
     
-    @ApiStatus.Experimental
     @Nullable Requirement getDisplayRequirement();
 }

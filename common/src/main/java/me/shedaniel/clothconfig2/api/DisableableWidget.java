@@ -18,13 +18,10 @@ public interface DisableableWidget {
      * @see HideableWidget#isDisplayed()
      * @see TickableWidget#tick()
      */
-    @ApiStatus.Experimental
     boolean isEnabled();
     
-    @ApiStatus.Experimental
     void setRequirement(@Nullable Requirement requirement);
     
-    @ApiStatus.Experimental
     @Nullable Requirement getRequirement();
     
 }

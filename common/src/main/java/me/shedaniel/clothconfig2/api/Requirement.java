@@ -24,14 +24,12 @@ public interface Requirement {
     /**
      * Checks if this requirement is currently true.
      */
-    @ApiStatus.Experimental
     boolean check();
     
     /**
      * Generates a {@link Requirement} that is true when {@code dependency}'s value is one of the provided values.
      */
     @SafeVarargs
-    @ApiStatus.Experimental
     static <T> @NotNull Requirement isValue(@NotNull ValueHolder<T> dependency, @Nullable T firstValue, @Nullable T... otherValues) {
         Set<@Nullable T> values = Stream.concat(Stream.of(firstValue), Arrays.stream(otherValues))
                 .collect(Collectors.toCollection(HashSet::new));
@@ -42,7 +40,6 @@ public interface Requirement {
     /**
      * Generates a {@link Requirement} that is true when {@code firstDependency}'s value equals {@code secondDependency}'s value.
      */
-    @ApiStatus.Experimental
     static @NotNull <T> Requirement matches(@NotNull ValueHolder<T> firstDependency, @NotNull ValueHolder<T> secondDependency) {
         return () -> Objects.equals(firstDependency.getValue(), secondDependency.getValue());
     }
@@ -50,7 +47,6 @@ public interface Requirement {
     /**
      * Generates a {@link Requirement} that is true when {@code dependency}'s value is true.
      */
-    @ApiStatus.Experimental
     static @NotNull Requirement isTrue(@NotNull ValueHolder<Boolean> dependency) {
         return () -> Boolean.TRUE.equals(dependency.getValue());
     }
@@ -58,7 +54,6 @@ public interface Requirement {
     /**
      * Generates a {@link Requirement} that is true when {@code dependency}'s value is false.
      */
-    @ApiStatus.Experimental
     static @NotNull Requirement isFalse(@NotNull ValueHolder<Boolean> dependency) {
         return () -> Boolean.FALSE.equals(dependency.getValue());
     }
@@ -66,7 +61,6 @@ public interface Requirement {
     /**
      * Generates a {@link Requirement} that is true when the given {@code requirement} is false.
      */
-    @ApiStatus.Experimental
     static Requirement not(@NotNull Requirement requirement) {
         return () -> !requirement.check();
     }
@@ -74,7 +68,6 @@ public interface Requirement {
     /**
      * Generates a {@link Requirement} that is true when all the given requirements are true.
      */
-    @ApiStatus.Experimental
     static @NotNull Requirement all(@NotNull Requirement... requirements) {
         return () -> Arrays.stream(requirements).allMatch(Requirement::check);
     }
@@ -82,7 +75,6 @@ public interface Requirement {
     /**
      * Generates a {@link Requirement} that is true when any of the given requirements are true.
      */
-    @ApiStatus.Experimental
     static @NotNull Requirement any(@NotNull Requirement... requirements) {
         return () -> Arrays.stream(requirements).anyMatch(Requirement::check);
     }
@@ -90,7 +82,6 @@ public interface Requirement {
     /**
      * Generates a {@link Requirement} that is true when none of the given requirements are true, i.e. all are false.
      */
-    @ApiStatus.Experimental
     static @NotNull Requirement none(Requirement... requirements) {
         return () -> Arrays.stream(requirements).noneMatch(Requirement::check);
     }
@@ -98,7 +89,6 @@ public interface Requirement {
     /**
      * Generates a {@link Requirement} that is true when precisely one of the given requirements is true.
      */
-    @ApiStatus.Experimental
     static @NotNull Requirement one(Requirement... requirements) {
         return () -> {
             // Use a for loop instead of Stream.count() so that we can return early. We only need to count past 1.
