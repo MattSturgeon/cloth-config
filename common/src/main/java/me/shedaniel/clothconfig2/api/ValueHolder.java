@@ -19,7 +19,10 @@
 
 package me.shedaniel.clothconfig2.api;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Method;
 
 public interface ValueHolder<T> {
     /**
@@ -30,4 +33,22 @@ public interface ValueHolder<T> {
      * @return the current value.
      */
     T getValue();
+    
+    /**
+     * Get the held value's class, as returned by {@link #getValue()}.
+     * 
+     * @return the {@link Class} describing the held value.
+     */
+    @ApiStatus.Internal
+    @SuppressWarnings("unchecked")
+    default Class<T> getType() {
+        Class<T> type;
+        try {
+            Method valueMethod = this.getClass().getMethod("getValue");
+            type = (Class<T>) valueMethod.getReturnType();
+        } catch (NoSuchMethodException | ClassCastException e) {
+            throw new IllegalStateException(e);
+        }
+        return type;
+    }
 }

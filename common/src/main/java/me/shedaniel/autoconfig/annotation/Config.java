@@ -19,6 +19,8 @@
 
 package me.shedaniel.autoconfig.annotation;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.lang.annotation.*;
 
 /**
@@ -29,6 +31,21 @@ import java.lang.annotation.*;
 public @interface Config {
     
     String name();
+    
+    /**
+     * Optionally define a class containing custom requirement handlers to be used.
+     */
+    @ApiStatus.Experimental
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @interface Handlers {
+        
+        /**
+         * One or more classes that contain {@link RequirementHandler custom requirement handlers}.
+         */
+        Class<?>[] value();
+        
+    }
     
     class Gui {
         private Gui() {

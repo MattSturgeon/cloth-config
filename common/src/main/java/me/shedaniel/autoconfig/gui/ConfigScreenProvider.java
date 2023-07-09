@@ -132,6 +132,17 @@ public class ConfigScreenProvider<T extends ConfigData> implements Supplier<Scre
                         )
                 );
         
+        // Register custom requirement handlers
+        var handlersAnnotation = configClass.getDeclaredAnnotation(Config.Handlers.class);
+        if (handlersAnnotation != null) {
+            registry.getRequirementManager().registerHandlerClass(handlersAnnotation.value());
+            Arrays.stream(handlersAnnotation.value())
+                    .forEach(registry.getRequirementManager()::registerHandlerClass);
+        }
+        
+        // FIXME this might be too early to build, if there's multiple child Config classes?
+        registry.getRequirementManager().buildCustomRequirement();
+        
         return buildFunction.apply(builder);
     }
     

@@ -23,6 +23,8 @@ import blue.endless.jankson.Comment;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
+import me.shedaniel.autoconfig.annotation.ConfigEntry.Gui.EnumHandler.EnumDisplayOption;
+import me.shedaniel.autoconfig.annotation.RequirementHandler;
 import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -34,6 +36,7 @@ import java.util.List;
 @Config(name = "autoconfig1u_example")
 @Config.Gui.Background("minecraft:textures/block/oak_planks.png")
 @Config.Gui.CategoryBackground(category = "b", background = "minecraft:textures/block/stone.png")
+@Config.Handlers(ExampleConfig.ModuleC.Handlers.class)
 public class ExampleConfig extends PartitioningSerializer.GlobalData {
     @ConfigEntry.Category("a")
     @ConfigEntry.Gui.TransitiveObject
@@ -46,6 +49,10 @@ public class ExampleConfig extends PartitioningSerializer.GlobalData {
     @ConfigEntry.Category("b")
     @ConfigEntry.Gui.TransitiveObject
     public ModuleB moduleB = new ModuleB();
+    
+    @ConfigEntry.Category("c")
+    @ConfigEntry.Gui.TransitiveObject
+    public ModuleC moduleC = new ModuleC();
     
     enum ExampleEnum {
         FOO,
@@ -62,7 +69,7 @@ public class ExampleConfig extends PartitioningSerializer.GlobalData {
         public ExampleEnum anEnum = ExampleEnum.FOO;
         
         @ConfigEntry.Gui.Tooltip(count = 2)
-        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        @ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
         public ExampleEnum anEnumWithButton = ExampleEnum.FOO;
         
         @Comment("This tooltip was automatically applied from a Jankson @Comment")
@@ -96,6 +103,95 @@ public class ExampleConfig extends PartitioningSerializer.GlobalData {
         
         @ConfigEntry.ColorPicker
         public int color = 0xFFFFFF;
+    }
+    
+    @Config(name = "module_c")
+    public static class ModuleC implements ConfigData {
+        
+        public static class Handlers {
+            
+            // TODO support non canonical refs
+            // TODO support auto-boxing primitive parameter types
+            @RequirementHandler("me.shedaniel.autoconfig.example.ExampleConfig.ModuleC.DependencySubCategory#coolToggle")
+            private static boolean coolToggleIsEnabled(Boolean coolToggle) {
+                return coolToggle;
+            }
+            
+            @RequirementHandler({
+                    "ExampleConfig.ModuleC.DependencySubCategory#coolToggle",
+                    "ExampleConfig.ModuleC.DependencySubCategory#lameToggle"
+            })
+            private static boolean coolToggleMatchesLameToggle(Boolean coolToggle, Boolean lameToggle) {
+                return coolToggle == lameToggle;
+            }
+            
+            @RequirementHandler("ExampleConfig.ModuleC.DependencySubCategory#intSlider")
+            private static boolean intSliderIsBigOrSmall(Integer intSlider) {
+                return intSlider > 70 || intSlider < -70;
+            }
+            
+            @RequirementHandler("ExampleConfig.ModuleC.DependencySubCategory#coolEnum")
+            private static boolean coolEnumIsGoodOrBetter(DependencyDemoEnum coolEnum) {
+                return coolEnum == DependencyDemoEnum.GOOD || coolEnum == DependencyDemoEnum.EXCELLENT;
+            }
+        }
+        
+        @ConfigEntry.Gui.PrefixText
+        @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
+        public DependencySubCategory dependencySubCategory = new DependencySubCategory();
+        public static class DependencySubCategory {
+            // me.shedaniel.autoconfig.example.ExampleConfig.ModuleC.DependencySubCategory
+    
+            @ConfigEntry.Gui.Tooltip
+            public boolean coolToggle = false;
+    
+            public boolean lameToggle = true;
+            
+            @ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
+            public DependencyDemoEnum coolEnum = DependencyDemoEnum.OKAY;
+            
+            @ConfigEntry.BoundedDiscrete(min = -100, max = 100)
+            public int intSlider = 50;
+    
+            @ConfigEntry.Requirement.EnableIf("coolToggle")
+            public boolean dependsOnCoolToggle1 = false;
+    
+            @ConfigEntry.Requirement.DisplayIf("ExampleConfig.ModuleC.Handlers#coolToggleIsEnabled")
+            public boolean dependsOnCoolToggle2 = false;
+    
+            @ConfigEntry.Requirement.EnableIf("ExampleConfig.ModuleC.Handlers#coolToggleMatchesLameToggle")
+            public boolean dependsOnToggleMatch = false;
+            
+            @ConfigEntry.Requirement.EnableIf("ExampleConfig.ModuleC.Handlers#intSliderIsBigOrSmall")
+            public boolean dependsOnIntSlider = true;
+    
+            @ConfigEntry.Gui.TransitiveObject
+            @ConfigEntry.Requirement.EnableIf("coolToggle")
+            @ConfigEntry.Requirement.EnableIf("ExampleConfig.ModuleC.Handlers#coolEnumIsGoodOrBetter")
+            public DependantObject dependantObject = new DependantObject();
+            public static class DependantObject {
+                @ConfigEntry.Gui.PrefixText
+                public boolean toggle1 = false;
+                @ConfigEntry.Requirement.EnableIf("ExampleConfig.ModuleC.Handlers#intSliderIsBigOrSmall")
+                public boolean toggle2 = true;
+            }
+    
+            @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
+            @ConfigEntry.Requirement.EnableIf("coolToggle")
+            public DependantCollapsible dependantCollapsible = new DependantCollapsible();
+            public static class DependantCollapsible {
+                public boolean toggle1 = false;
+                public boolean toggle2 = true;
+            }
+    
+            @ConfigEntry.Requirement.EnableIf("ExampleConfig.ModuleC.Handlers#coolToggleIsEnabled")
+            public List<Integer> list = Arrays.asList(1, 2, 3);
+    
+        }
+    
+        @ConfigEntry.Requirement.EnableIf("ExampleConfig.ModuleC.DependencySubCategory#coolToggle")
+        public boolean dependsOnCoolToggleOutside = false;
+        
     }
     
     @Config(name = "empty")
@@ -132,5 +228,9 @@ public class ExampleConfig extends PartitioningSerializer.GlobalData {
             this.first = first;
             this.second = second;
         }
+    }
+    
+    enum DependencyDemoEnum {
+        EXCELLENT, GOOD, OKAY, BAD, HORRIBLE
     }
 }

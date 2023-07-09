@@ -20,6 +20,7 @@
 package me.shedaniel.autoconfig.gui.registry;
 
 import me.shedaniel.autoconfig.gui.registry.api.GuiRegistryAccess;
+import me.shedaniel.autoconfig.requirements.RequirementManager;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -30,12 +31,16 @@ import java.util.List;
 import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
-public class ComposedGuiRegistryAccess implements GuiRegistryAccess {
+public class ComposedGuiRegistryAccess extends AbstractGuiRegistry {
     
     private List<GuiRegistryAccess> children;
     
     public ComposedGuiRegistryAccess(GuiRegistryAccess... children) {
         this.children = Arrays.asList(children);
+        this.children.forEach(child -> {
+            child.setLookupTable(this.getLookupTable());
+            child.setRequirementManager(this.getRequirementManager());
+        });
     }
     
     @Override
@@ -79,5 +84,17 @@ public class ComposedGuiRegistryAccess implements GuiRegistryAccess {
         for (GuiRegistryAccess child : children) {
             child.runPostHook(guis, i18n, field, config, defaults, registry);
         }
+    }
+    
+    @Override
+    public void setLookupTable(GuiLookupTable table) {
+        super.setLookupTable(table);
+        children.forEach(child -> child.setLookupTable(table));
+    }
+    
+    @Override
+    public void setRequirementManager(RequirementManager manager) {
+        super.setRequirementManager(manager);
+        children.forEach(child -> child.setRequirementManager(manager));
     }
 }

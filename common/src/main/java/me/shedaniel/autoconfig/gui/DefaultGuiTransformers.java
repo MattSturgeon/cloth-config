@@ -23,6 +23,7 @@ import blue.endless.jankson.Comment;
 import com.google.common.collect.Lists;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.gui.registry.GuiRegistry;
+import me.shedaniel.autoconfig.gui.registry.api.GuiRegistryAccess;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.gui.entries.TextListEntry;
@@ -31,10 +32,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Optional;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -42,6 +42,14 @@ import java.util.stream.IntStream;
 public class DefaultGuiTransformers {
     
     private static final ConfigEntryBuilder ENTRY_BUILDER = ConfigEntryBuilder.create();
+    
+    @SuppressWarnings("unchecked")
+    private static final Class<? extends Annotation>[] REQUIREMENT_ANNOTATIONS = new Class[]{
+            ConfigEntry.Requirement.EnableIf.class,
+            ConfigEntry.Requirement.DisplayIf.class,
+            ConfigEntry.Requirement.EnableIfGroup.class,
+            ConfigEntry.Requirement.DisplayIfGroup.class
+    };
     
     private DefaultGuiTransformers() {
     }
@@ -126,7 +134,19 @@ public class DefaultGuiTransformers {
                 ConfigEntry.Gui.RequiresRestart.class
         );
         
+        // Register a transformer for each requirement annotation
+        for (Class<? extends Annotation> annotation : REQUIREMENT_ANNOTATIONS) {
+            registry.registerAnnotationTransformer(DefaultGuiTransformers::registerRequirements, annotation);
+        }
+        
         return registry;
+    }
+    
+    private static List<AbstractConfigListEntry> registerRequirements(List<AbstractConfigListEntry> guis, String i18n, Field field, Object config, Object defaults, GuiRegistryAccess guiProvider) {
+        for (AbstractConfigListEntry gui : guis) {
+            guiProvider.getRequirementManager().registerRequirements(gui, field);
+        }
+        return guis;
     }
     
     private static void tryApplyTooltip(AbstractConfigListEntry gui, Component[] text) {

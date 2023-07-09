@@ -19,10 +19,9 @@
 
 package me.shedaniel.autoconfig.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.jetbrains.annotations.ApiStatus;
+
+import java.lang.annotation.*;
 
 public class ConfigEntry {
     
@@ -152,6 +151,105 @@ public class ConfigEntry {
                 DROPDOWN,
                 BUTTON
             }
+        }
+    }
+    
+    @ApiStatus.Experimental
+    public static class Requirement {
+        private Requirement() {}
+        
+        /**
+         * This Config Entry is enabled only when this requirement is met.
+         *
+         * <p>{@link #value()} contains a list of references, usually to other {@link ConfigEntry.Gui Config Entries}, whose
+         * values are compared against {@link #condition()} and {@link #regexCondition()}.
+         * 
+         * <p>If no conditions are provided, {@code boolean} Config Entries will assume the required condition is {@code true},
+         * while non-{@code boolean} Config Entries will throw an {@link IllegalArgumentException}.
+         *
+         * <p>Additionally, {@link #value()} can contain references to {@link RequirementHandler Custom Requirements}, which are
+         * evaluated without considering any conditions defined here.
+         *
+         * <p>This requirement is considered met if any Custom Requirement evaluates to {@code true} <strong>or</strong>
+         * any Config Entry requirement matches any of the conditions listed.
+         * 
+         * @see DisplayIf
+         */
+        @Retention(RetentionPolicy.RUNTIME)
+        @Target(ElementType.FIELD)
+        @Repeatable(EnableIfGroup.class)
+        public @interface EnableIf {
+            /**
+             * One or more references to {@link ConfigEntry.Gui Config Entries} or {@link RequirementHandler Custom Requirements}.
+             */
+            String[] value();
+            
+            /**
+             * Zero or more strings that satisfy this condition.
+             * 
+             * <p>Ignored by {@link RequirementHandler Custom Requirements}
+             */
+            String[] condition() default {};
+            
+            /**
+             * Zero or more {@link java.util.regex.Pattern Regular Expressions} that satisfy this condition.
+             * 
+             * <p>Will be compiled using {@link java.util.regex.Pattern#compile(String) Pattern.compile()} and a
+             * {@link java.util.regex.PatternSyntaxException PatternSyntaxException} thrown if the RegEx is invalid.
+             * 
+             * <p>Ignored by {@link RequirementHandler Custom Requirements}
+             */
+            String[] regexCondition() default {};
+        }
+        
+        /**
+         * This Config Entry is displayed in the GUI only when this requirement is met.
+         * 
+         * @see EnableIf
+         */
+        @Retention(RetentionPolicy.RUNTIME)
+        @Target(ElementType.FIELD)
+        @Repeatable(DisplayIfGroup.class)
+        public @interface DisplayIf {
+            /**
+             * @see EnableIf#value() 
+             */
+            String[] value();
+            
+            /**
+             * @see EnableIf#condition() 
+             */
+            String[] condition() default {};
+            
+            /**
+             * @see EnableIf#regexCondition() 
+             */
+            String[] regexCondition() default {};
+        }
+        
+        @Retention(RetentionPolicy.RUNTIME)
+        @Target(ElementType.FIELD)
+        public @interface EnableIfGroup {
+            
+            EnableIf[] value();
+            
+            Quantity requirement() default Quantity.ALL;
+        }
+        
+        @Retention(RetentionPolicy.RUNTIME)
+        @Target(ElementType.FIELD)
+        public @interface DisplayIfGroup {
+            
+            DisplayIf[] value();
+            
+            Quantity requirement() default Quantity.ALL;
+        }
+        
+        public enum Quantity {
+            ALL,
+            ANY,
+            NONE,
+            ONE
         }
     }
 }
