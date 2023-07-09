@@ -32,6 +32,10 @@ public class DefaultGuiHooks {
     
     public static GuiRegistry apply(GuiRegistry registry) {
         
+        registry.registerPostHook((guis, i18n, field, config, defaults, guiProvider) -> guiProvider.getLookupTable().register(field, guis));
+        
+        registry.registerPostHook((guis, i18n, field, config, defaults, guiProvider) -> guiProvider.getRequirementManager().registerRequirements(guis, field));
+        
         // FIXME Remove debugging code
         registry.registerPreHook((guis, i18n, field, config, defaults, guiProvider) ->
                 System.out.printf("Pre hook for \"%s\" (`%s#%s`)%n", i18n, field.getDeclaringClass().getCanonicalName(), field.getName()));

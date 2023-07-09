@@ -67,7 +67,7 @@ public final class GuiRegistry extends AbstractGuiRegistry {
             Object defaults,
             GuiRegistryAccess registry
     ) {
-        var guis =  firstPresent(
+        return firstPresent(
                 Arrays.stream(Priority.values())
                         .map(priority ->
                                 (Supplier<Optional<ProviderEntry>>) () ->
@@ -78,10 +78,6 @@ public final class GuiRegistry extends AbstractGuiRegistry {
         )
                 .map(entry -> entry.provider.get(i18n, field, config, defaults, registry))
                 .orElse(null);
-        
-        this.getLookupTable().register(field, guis);
-        
-        return guis;
     }
     
     @Override
@@ -101,8 +97,6 @@ public final class GuiRegistry extends AbstractGuiRegistry {
         for (GuiTransformer transformer : matchedTransformers) {
             guis = transformer.transform(guis, i18n, field, config, defaults, registry);
         }
-        
-        this.getLookupTable().register(field, guis);
         
         return guis;
     }

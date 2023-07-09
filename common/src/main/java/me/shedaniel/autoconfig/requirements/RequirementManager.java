@@ -32,12 +32,12 @@ public class RequirementManager {
     }
     
     /**
-     * Register a config entry whose field has requirement annotations declared
+     * Register config entries whose defining field may have requirement annotations declared
      * 
-     * @param gui
+     * @param guis
      * @param field
      */
-    public void registerRequirements(AbstractConfigEntry gui, Field field) {
+    public void registerRequirements(Collection<? extends AbstractConfigEntry> guis, Field field) {
         
         // If this field has requirements defined, add them to the map
         List<RequirementDefinition> requirements = RequirementDefinition.from(field);
@@ -47,14 +47,16 @@ public class RequirementManager {
             // considering the entry may have additional requirements defined elsewhere.
             int size = requirements.size();
             int initialCapacity = size + Math.min(size, 32);
-            declaredRequirements
-                    .computeIfAbsent(gui, e -> new HashSet<>(initialCapacity))
-                    .addAll(requirements);
+            for (AbstractConfigEntry gui : guis) {
+                declaredRequirements
+                        .computeIfAbsent(gui, e -> new HashSet<>(initialCapacity))
+                        .addAll(requirements);
+            }
         }
     }
     
     /**
-     * Register a class containing custom requirement handlers
+     * Register a class which may contain custom requirement handlers
      * 
      * @param classes zero or more classes which contain requirement handler methods
      */
