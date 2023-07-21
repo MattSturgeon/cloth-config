@@ -16,21 +16,21 @@ import java.util.List;
 public record RequirementDefinition(
         Quantity qty,
         Action action,
-        RequirementDefinitionMember[] children
+        RequirementDefinitionEntry[] children
 ) {
     
     public RequirementDefinition(Class<?> base, ConfigEntry.Requirement.EnableIf annotation) {
         this(
                 Quantity.ALL,
                 Action.ENABLE,
-                new RequirementDefinitionMember[] { RequirementDefinitionMember.from(base, annotation) });
+                new RequirementDefinitionEntry[] { RequirementDefinitionEntry.from(base, annotation) });
     }
     
     public RequirementDefinition(Class<?> base, ConfigEntry.Requirement.DisplayIf annotation) {
         this(
                 Quantity.ALL,
                 Action.DISPLAY,
-                new RequirementDefinitionMember[] { RequirementDefinitionMember.from(base, annotation) });
+                new RequirementDefinitionEntry[] { RequirementDefinitionEntry.from(base, annotation) });
     }
     
     public RequirementDefinition(Class<?> base, ConfigEntry.Requirement.EnableIfGroup annotation) {
@@ -38,8 +38,8 @@ public record RequirementDefinition(
                 annotation.requirement(),
                 Action.ENABLE,
                 Arrays.stream(annotation.value())
-                        .map(refs -> RequirementDefinitionMember.from(base, refs))
-                        .toArray(RequirementDefinitionMember[]::new));
+                        .map(refs -> RequirementDefinitionEntry.from(base, refs))
+                        .toArray(RequirementDefinitionEntry[]::new));
     }
     
     public RequirementDefinition(Class<?> base, ConfigEntry.Requirement.DisplayIfGroup annotation) {
@@ -47,8 +47,8 @@ public record RequirementDefinition(
                 annotation.requirement(),
                 Action.DISPLAY,
                 Arrays.stream(annotation.value())
-                        .map(refs -> RequirementDefinitionMember.from(base, refs))
-                        .toArray(RequirementDefinitionMember[]::new));
+                        .map(refs -> RequirementDefinitionEntry.from(base, refs))
+                        .toArray(RequirementDefinitionEntry[]::new));
     }
     
     public static List<RequirementDefinition> from(Field field) {

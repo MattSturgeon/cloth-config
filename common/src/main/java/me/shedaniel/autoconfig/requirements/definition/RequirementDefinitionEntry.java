@@ -17,21 +17,21 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-record RequirementDefinitionMember(
+record RequirementDefinitionEntry(
         Reference[] refs,
         String[] conditions,
         Pattern[] regexConditions
 ) {
     
-    static RequirementDefinitionMember from(Class<?> base, ConfigEntry.Requirement.EnableIf annotation) {
+    static RequirementDefinitionEntry from(Class<?> base, ConfigEntry.Requirement.EnableIf annotation) {
         return from(base, annotation.value(), annotation.condition(), annotation.regexCondition());
     }
     
-    static RequirementDefinitionMember from(Class<?> base, ConfigEntry.Requirement.DisplayIf annotation) {
+    static RequirementDefinitionEntry from(Class<?> base, ConfigEntry.Requirement.DisplayIf annotation) {
         return from(base, annotation.value(), annotation.condition(), annotation.regexCondition());
     }
     
-    private static RequirementDefinitionMember from(Class<?> base, String[] references, String[] conditions, String[] regexConditions) {
+    private static RequirementDefinitionEntry from(Class<?> base, String[] references, String[] conditions, String[] regexConditions) {
         Reference[] refs = Arrays.stream(references)
                 .map(ref -> Reference.parse(base, ref))
                 .toArray(Reference[]::new);
@@ -45,7 +45,7 @@ record RequirementDefinitionMember(
             throw new RuntimeException("Invalid regex in requirement conditions (in %s)".formatted(base.getCanonicalName()), e);
         }
         
-        return new RequirementDefinitionMember(refs, conditions, patterns);
+        return new RequirementDefinitionEntry(refs, conditions, patterns);
     }
     
     public Requirement build(GuiLookupTable guis, HandlerLookupTable handlers) {

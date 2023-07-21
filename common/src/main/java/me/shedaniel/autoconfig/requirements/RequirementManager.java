@@ -7,10 +7,10 @@ import me.shedaniel.autoconfig.example.ExampleConfig;
 import me.shedaniel.autoconfig.gui.registry.GuiLookupTable;
 import me.shedaniel.autoconfig.requirements.definition.Reference;
 import me.shedaniel.autoconfig.requirements.definition.RequirementDefinition;
-import me.shedaniel.clothconfig2.api.AbstractConfigEntry;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.Requirement;
 import me.shedaniel.clothconfig2.api.ValueHolder;
+import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,8 +24,7 @@ public class RequirementManager {
     
     private final GuiLookupTable guis;
     private final Collection<Class<?>> handlerClasses = new HashSet<>();
-    // FIXME AbstractConfigEntry vs AbstractConfigListEntry (vs a superclass or interface...)
-    private final Map<AbstractConfigEntry, Set<RequirementDefinition>> declaredRequirements = new HashMap<>();
+    private final Map<DynamicEntryListWidget.Entry, Set<RequirementDefinition>> requirements = new HashMap<>();
     
     public RequirementManager(GuiLookupTable guiLookupTable) {
         this.guis = guiLookupTable;
@@ -37,7 +36,7 @@ public class RequirementManager {
      * @param guis
      * @param field
      */
-    public void registerRequirements(Collection<? extends AbstractConfigEntry> guis, Field field) {
+    public void registerRequirements(Collection<? extends DynamicEntryListWidget.Entry> guis, Field field) {
         
         // If this field has requirements defined, add them to the map
         List<RequirementDefinition> requirements = RequirementDefinition.from(field);
@@ -47,8 +46,8 @@ public class RequirementManager {
             // considering the entry may have additional requirements defined elsewhere.
             int size = requirements.size();
             int initialCapacity = size + Math.min(size, 32);
-            for (AbstractConfigEntry gui : guis) {
-                declaredRequirements
+            for (DynamicEntryListWidget.Entry gui : guis) {
+                this.requirements
                         .computeIfAbsent(gui, e -> new HashSet<>(initialCapacity))
                         .addAll(requirements);
             }
@@ -66,7 +65,7 @@ public class RequirementManager {
     
     public void buildCustomRequirement() {
         HandlerLookupTable handlers = HandlerLookupTable.fromClasses(handlerClasses, this::buildCustomRequirement);
-        declaredRequirements.forEach(((gui, definitions) ->
+        requirements.forEach(((gui, definitions) ->
                 buildRequirements(gui, definitions, guis, handlers)
                         .apply()));
         
@@ -76,7 +75,7 @@ public class RequirementManager {
         guis.getTable().forEach((key, list) -> list.forEach(gui -> System.out.printf("%s: %s%n", key, gui.toString())));
         
         System.out.printf("%n%nRegistered fields with dependencies%n");
-        declaredRequirements.forEach((gui, list) -> 
+        requirements.forEach((gui, list) -> 
                 list.forEach(def -> System.out.printf("%s: %s%n", gui.toString(), def.action())));
         
         System.out.printf("%n%nCustom Requirement methods:%n");
@@ -224,7 +223,7 @@ public class RequirementManager {
                || field.isAnnotationPresent(ConfigEntry.Requirement.DisplayIfGroup.class);
     }
     
-    private static Requirements buildRequirements(AbstractConfigEntry gui, Collection<RequirementDefinition> requirements, GuiLookupTable guis, HandlerLookupTable handlers) {
+    private static Requirements buildRequirements(DynamicEntryListWidget.Entry gui, Collection<RequirementDefinition> requirements, GuiLookupTable guis, HandlerLookupTable handlers) {
         Set<Requirement> enables = new HashSet<>(requirements.size());
         Set<Requirement> displays = new HashSet<>(requirements.size());
         
@@ -258,7 +257,7 @@ public class RequirementManager {
      * Encapsulates each supported type of requirement along with the Config Entry GUI that they should control.
      */
     private record Requirements(
-            AbstractConfigEntry gui,
+            DynamicEntryListWidget.Entry gui,
             @Nullable Requirement enable,
             @Nullable Requirement display
     ) {
