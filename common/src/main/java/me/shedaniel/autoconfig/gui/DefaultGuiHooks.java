@@ -20,14 +20,25 @@
 package me.shedaniel.autoconfig.gui;
 
 import me.shedaniel.autoconfig.gui.registry.GuiRegistry;
+import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+
+import java.util.Arrays;
 
 @Environment(EnvType.CLIENT)
 public class DefaultGuiHooks {
     private DefaultGuiHooks() {}
     
     public static GuiRegistry apply(GuiRegistry registry) {
+        
+        // FIXME Remove debugging code
+        registry.registerPreHook((guis, i18n, field, config, defaults, guiProvider) ->
+                System.out.printf("Pre hook for \"%s\" (`%s#%s`)%n", i18n, field.getDeclaringClass().getCanonicalName(), field.getName()));
+        
+        registry.registerPostHook((guis, i18n, field, config, defaults, guiProvider) ->
+                System.out.printf("Post hook for \"%s\" (`%s#%s`):%n%s%n", i18n, field.getDeclaringClass().getCanonicalName(), field.getName(), Arrays.toString(guis.toArray(AbstractConfigListEntry[]::new))));
+        
         return registry;
     }
 }
