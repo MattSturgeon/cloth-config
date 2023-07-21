@@ -39,9 +39,9 @@ import java.util.stream.Stream;
 @Environment(EnvType.CLIENT)
 public final class GuiRegistry implements GuiRegistryAccess {
     
-    private final Map<Priority, List<ProviderEntry>> providers = new HashMap<>();
+    private final Map<Priority, List<ProviderEntry>> providers = new TreeMap<>();
     private final List<TransformerEntry> transformers = new ArrayList<>();
-    private final Map<HookEvent, List<GuiRegistryHook>> hooks = new HashMap<>();
+    private final Map<HookEvent, List<GuiRegistryHook>> hooks = new TreeMap<>();
     
     public GuiRegistry() {
         for (Priority priority : Priority.values()) {
