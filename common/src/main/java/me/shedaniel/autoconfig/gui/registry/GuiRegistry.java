@@ -21,10 +21,12 @@ package me.shedaniel.autoconfig.gui.registry;
 
 import me.shedaniel.autoconfig.gui.registry.api.GuiProvider;
 import me.shedaniel.autoconfig.gui.registry.api.GuiRegistryAccess;
+import me.shedaniel.autoconfig.gui.registry.api.GuiRegistryHook;
 import me.shedaniel.autoconfig.gui.registry.api.GuiTransformer;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -37,12 +39,16 @@ import java.util.stream.Stream;
 @Environment(EnvType.CLIENT)
 public final class GuiRegistry implements GuiRegistryAccess {
     
-    private Map<Priority, List<ProviderEntry>> providers = new HashMap<>();
-    private List<TransformerEntry> transformers = new ArrayList<>();
+    private final Map<Priority, List<ProviderEntry>> providers = new HashMap<>();
+    private final List<TransformerEntry> transformers = new ArrayList<>();
+    private final Map<HookEvent, List<GuiRegistryHook>> hooks = new HashMap<>();
     
     public GuiRegistry() {
         for (Priority priority : Priority.values()) {
             providers.put(priority, new ArrayList<>());
+        }
+        for (HookEvent event : HookEvent.values()) {
+            hooks.put(event, new ArrayList<>());
         }
     }
     
@@ -96,6 +102,21 @@ public final class GuiRegistry implements GuiRegistryAccess {
         return guis;
     }
     
+    @Override
+    public void runPreHook(String i18n, Field field, Object config, Object defaults, GuiRegistryAccess registry) {
+        for (GuiRegistryHook hook : hooks.get(HookEvent.BEFORE)) {
+            hook.run(Collections.emptyList(), i18n, field, config, defaults, registry);
+        }
+    }
+    
+    @Override
+    public void runPostHook(List<AbstractConfigListEntry> guis, String i18n, Field field, Object config, Object defaults, GuiRegistryAccess registry) {
+        var constGuis = Collections.unmodifiableList(guis);
+        for (GuiRegistryHook hook : hooks.get(HookEvent.AFTER)) {
+            hook.run(constGuis, i18n, field, config, defaults, registry);
+        }
+    }
+    
     private void registerProvider(Priority priority, GuiProvider provider, Predicate<Field> predicate) {
         providers.computeIfAbsent(priority, p -> new ArrayList<>()).add(new ProviderEntry(predicate, provider));
     }
@@ -146,10 +167,29 @@ public final class GuiRegistry implements GuiRegistryAccess {
         }
     }
     
+    private void registerHook(HookEvent event, GuiRegistryHook hook) {
+        hooks.computeIfAbsent(event, e -> new ArrayList<>()).add(hook);
+    }
+    
+    @ApiStatus.Experimental
+    public final void registerPreHook(GuiRegistryHook hook) {
+        registerHook(HookEvent.BEFORE, hook);
+    }
+    
+    @ApiStatus.Experimental
+    public final void registerPostHook(GuiRegistryHook hook) {
+        registerHook(HookEvent.AFTER, hook);
+    }
+    
     private enum Priority {
         FIRST,
         NORMAL,
         LAST
+    }
+    
+    private enum HookEvent {
+        BEFORE,
+        AFTER
     }
     
     private static class ProviderEntry {

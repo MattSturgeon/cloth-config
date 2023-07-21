@@ -66,4 +66,18 @@ public class ComposedGuiRegistryAccess implements GuiRegistryAccess {
         }
         return guis;
     }
+    
+    @Override
+    public void runPreHook(String i18n, Field field, Object config, Object defaults, GuiRegistryAccess registry) {
+        for (GuiRegistryAccess child : children) {
+            child.runPreHook(i18n, field, config, defaults, registry);
+        }
+    }
+    
+    @Override
+    public void runPostHook(List<AbstractConfigListEntry> guis, String i18n, Field field, Object config, Object defaults, GuiRegistryAccess registry) {
+        for (GuiRegistryAccess child : children) {
+            child.runPostHook(guis, i18n, field, config, defaults, registry);
+        }
+    }
 }
