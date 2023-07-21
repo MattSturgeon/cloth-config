@@ -9,8 +9,6 @@ import me.shedaniel.autoconfig.requirements.builder.StaticRequirementBuilder;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.Requirement;
 import me.shedaniel.clothconfig2.api.ValueHolder;
-import me.shedaniel.clothconfig2.gui.entries.BooleanListEntry;
-import me.shedaniel.clothconfig2.gui.entries.EnumListEntry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -79,13 +77,17 @@ record RequirementDefinitionEntry(
         return Requirement.any(requirements);
     }
     
+    @SuppressWarnings("unchecked")
     private @Nullable StaticRequirementBuilder<?> builder(ValueHolder<?> gui) {
-        if (gui instanceof BooleanListEntry booleanListEntry) {
-            return new BooleanRequirementBuilder(booleanListEntry, conditions(), regexConditions());
+        Class<?> type = gui.getType();
+        if (Boolean.class.equals(type)) {
+            return new BooleanRequirementBuilder((ValueHolder<Boolean>) gui, conditions(), regexConditions());
         }
-        if (gui instanceof EnumListEntry<?> enumListEntry) {
-            return new EnumRequirementBuilder<>(enumListEntry, conditions(), regexConditions());
+        if (Enum.class.isAssignableFrom(type)) {
+            return new EnumRequirementBuilder<>((ValueHolder<Enum<?>>) gui, conditions(), regexConditions());
         }
+        // TODO String
+        // TODO Generic _string compare_ via toString _or_valueOf??
         return null;
     }
 }
