@@ -5,19 +5,17 @@ import me.shedaniel.clothconfig2.api.ValueHolder;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-public class BooleanRequirementBuilder implements StaticRequirementBuilder<Boolean> {
+public class BooleanRequirementBuilder extends AbstractRequirementBuilder<Boolean> {
     
     private static final Pattern TRUTHY = Pattern.compile("^(?:t(?:rue)?|y(?:es)?|on|enabled?)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern FALSEY = Pattern.compile("^(?:f(?:alse)?|no?|off|disabled?)$", Pattern.CASE_INSENSITIVE);
     
-    private final ValueHolder<? extends Boolean> gui;
-    private final Boolean[] conditions;
-    private final Pattern[] regexConditions;
+    public BooleanRequirementBuilder(ValueHolder<Boolean> gui, String[] conditions, Pattern[] regexConditions) {
+        super(gui, conditions, regexConditions);
+    }
     
-    public BooleanRequirementBuilder(ValueHolder<? extends Boolean> gui, String[] conditions, Pattern[] regexConditions) {
-        this.gui = gui;
-        this.regexConditions = regexConditions;
-        
+    @Override
+    protected Boolean[] parseConditions(String[] conditions) {
         Boolean[] definedConditions = Arrays.stream(conditions)
                 .map(s -> {
                     if (TRUTHY.matcher(s).matches()) {
@@ -32,23 +30,9 @@ public class BooleanRequirementBuilder implements StaticRequirementBuilder<Boole
                 .toArray(Boolean[]::new);
         
         // For booleans, default to checking `true` if no conditions are defined
-        this.conditions = definedConditions.length < 1 && regexConditions.length < 1
+        return definedConditions.length < 1 && this.regexConditions.length < 1
                 ? new Boolean[]{true}
                 : definedConditions;
-    }
-    
-    @Override
-    public ValueHolder<? extends Boolean> gui() {
-        return this.gui;
-    }
-    
-    @Override
-    public Boolean[] conditions() {
-        return this.conditions;
-    }
-    
-    @Override
-    public Pattern[] regexConditions() {
-        return this.regexConditions;
+        
     }
 }

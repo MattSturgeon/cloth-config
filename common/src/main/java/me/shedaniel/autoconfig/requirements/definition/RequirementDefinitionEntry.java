@@ -5,11 +5,11 @@ import me.shedaniel.autoconfig.gui.registry.GuiLookupTable;
 import me.shedaniel.autoconfig.requirements.HandlerLookupTable;
 import me.shedaniel.autoconfig.requirements.builder.BooleanRequirementBuilder;
 import me.shedaniel.autoconfig.requirements.builder.EnumRequirementBuilder;
-import me.shedaniel.autoconfig.requirements.builder.StaticRequirementBuilder;
+import me.shedaniel.autoconfig.requirements.builder.GenericRequirementBuilder;
+import me.shedaniel.autoconfig.requirements.builder.RequirementBuilder;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.Requirement;
 import me.shedaniel.clothconfig2.api.ValueHolder;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;
@@ -64,12 +64,7 @@ record RequirementDefinitionEntry(
                     }
                     
                     // Build a static handler matching the Config Entry's value to the defined conditions
-                    StaticRequirementBuilder<?> builder = builder(gui);
-                    if (builder == null) {
-                        throw new IllegalStateException("Unsupported Config Entry type `%s`".formatted(gui.getClass().getSimpleName()));
-                    }
-                    
-                    return builder.build();
+                    return builder(gui).build();
                     
                 })
                 .toArray(Requirement[]::new);
@@ -78,7 +73,7 @@ record RequirementDefinitionEntry(
     }
     
     @SuppressWarnings("unchecked")
-    private @Nullable StaticRequirementBuilder<?> builder(ValueHolder<?> gui) {
+    private RequirementBuilder<?> builder(ValueHolder<?> gui) {
         Class<?> type = gui.getType();
         if (Boolean.class.equals(type)) {
             return new BooleanRequirementBuilder((ValueHolder<Boolean>) gui, conditions(), regexConditions());
@@ -86,8 +81,8 @@ record RequirementDefinitionEntry(
         if (Enum.class.isAssignableFrom(type)) {
             return new EnumRequirementBuilder<>((ValueHolder<Enum<?>>) gui, conditions(), regexConditions());
         }
-        // TODO String
-        // TODO Generic _string compare_ via toString _or_valueOf??
-        return null;
+        // TODO numbers
+        // TODO should we have a string-specific builder? Generic already does string comparing...
+        return new GenericRequirementBuilder<>((ValueHolder<Object>) gui, conditions(), regexConditions());
     }
 }
