@@ -8,13 +8,14 @@ import java.util.regex.Pattern;
 
 public class EnumRequirementBuilder<T extends Enum<?>> extends AbstractRequirementBuilder<T> {
     
-    public EnumRequirementBuilder(ValueHolder<T> gui, String[] conditions, Pattern[] regexConditions) {
-        super(gui, conditions, regexConditions);
+    private final T[] conditions;
+    
+    public EnumRequirementBuilder(Class<T> type, ValueHolder<T> gui, String[] conditions, Pattern[] regexConditions) {
+        super(gui, regexConditions);
+        this.conditions = parseConditions(type, conditions);
     }
     
-    @Override
-    protected T[] parseConditions(String[] conditions) {
-        Class<T> type = this.gui.getType();
+    private static <T extends Enum<?>> T[] parseConditions(Class<T> type, String[] conditions) {
         T[] permitted = type.getEnumConstants();
         
         return Arrays.stream(conditions)
@@ -24,5 +25,10 @@ public class EnumRequirementBuilder<T extends Enum<?>> extends AbstractRequireme
                         .orElseThrow(() -> new RuntimeException("Invalid enum constant \"%s\" (not found in %s)"
                                 .formatted(s, type.getCanonicalName()))))
                 .toArray(length -> (T[]) Array.newInstance(type, length));
+    }
+    
+    @Override
+    protected T[] conditions() {
+        return conditions;
     }
 }

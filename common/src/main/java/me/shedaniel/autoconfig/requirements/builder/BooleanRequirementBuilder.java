@@ -9,13 +9,19 @@ public class BooleanRequirementBuilder extends AbstractRequirementBuilder<Boolea
     
     private static final Pattern TRUTHY = Pattern.compile("^(?:t(?:rue)?|y(?:es)?|on|enabled?)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern FALSEY = Pattern.compile("^(?:f(?:alse)?|no?|off|disabled?)$", Pattern.CASE_INSENSITIVE);
+    private final Boolean[] conditions;
     
     public BooleanRequirementBuilder(ValueHolder<Boolean> gui, String[] conditions, Pattern[] regexConditions) {
-        super(gui, conditions, regexConditions);
+        super(gui, regexConditions);
+        this.conditions = parseConditions(conditions);
     }
     
     @Override
-    protected Boolean[] parseConditions(String[] conditions) {
+    protected Boolean[] conditions() {
+        return conditions;
+    }
+    
+    private Boolean[] parseConditions(String[] conditions) {
         Boolean[] definedConditions = Arrays.stream(conditions)
                 .map(s -> {
                     if (TRUTHY.matcher(s).matches()) {

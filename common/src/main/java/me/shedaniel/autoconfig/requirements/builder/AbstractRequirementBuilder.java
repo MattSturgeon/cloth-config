@@ -8,16 +8,17 @@ import java.util.regex.Pattern;
 public abstract class AbstractRequirementBuilder<T> implements RequirementBuilder<T> {
     
     protected final ValueHolder<T> gui;
-    protected final T[] conditions;
+    
+    // FIXME this will be a lot simpler with collections...
     protected final Pattern[] regexConditions;
     
-    protected AbstractRequirementBuilder(ValueHolder<T> gui, String[] conditions, Pattern[] regexConditions) {
+    protected AbstractRequirementBuilder(ValueHolder<T> gui, Pattern[] regexConditions) {
         this.gui = gui;
         this.regexConditions = regexConditions;
-        this.conditions = parseConditions(conditions);
     }
     
-    protected abstract T[] parseConditions(String[] conditions);
+    // FIXME this will be a lot simpler with collections...
+    protected abstract T[] conditions();
     
     @Override
     public T getValue() {
@@ -28,7 +29,7 @@ public abstract class AbstractRequirementBuilder<T> implements RequirementBuilde
     public boolean conditionsMatch(T value) {
         // TODO should we allow conditions to ignore case?
         //    Or is it ok that regex can provide this usage?
-        return Arrays.asList(conditions).contains(value);
+        return Arrays.asList(conditions()).contains(value);
     }
     
     @Override

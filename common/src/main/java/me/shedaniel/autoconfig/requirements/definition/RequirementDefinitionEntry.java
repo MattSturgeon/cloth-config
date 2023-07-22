@@ -79,9 +79,11 @@ record RequirementDefinitionEntry(
             return new BooleanRequirementBuilder((ValueHolder<Boolean>) gui, conditions(), regexConditions());
         }
         if (Enum.class.isAssignableFrom(type)) {
-            return new EnumRequirementBuilder<>((ValueHolder<Enum<?>>) gui, conditions(), regexConditions());
+            return new EnumRequirementBuilder<>((Class<Enum<?>>) type, (ValueHolder<Enum<?>>) gui, conditions(), regexConditions());
         }
-        // TODO numbers
+        if (Number.class.isAssignableFrom(type)) {
+            return NumberRequirementBuilder.from((Class<Number>) type, (ValueHolder<Number>) gui, conditions(), regexConditions());
+        }
         // TODO should we have a string-specific builder? Generic already does string comparing...
         return new GenericRequirementBuilder<>((ValueHolder<Object>) gui, conditions(), regexConditions());
     }
