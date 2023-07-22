@@ -1,24 +1,26 @@
 package me.shedaniel.autoconfig.requirements.builder;
 
 import me.shedaniel.clothconfig2.api.ValueHolder;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-public class NumberRequirementBuilder<T extends Number & Comparable<T>> extends AbstractRequirementBuilder<T, T> {
+@ApiStatus.Internal
+class NumberRequirementBuilder<T extends Number & Comparable<T>> extends AbstractRequirementBuilder<T, T> {
     
     // TODO consider allowing the user to specify comparison operators in condition strings
     //      would need to store conditions in a generic record class instead of just the raw number
     //      Something like NumberCondition(T number, Operator operator)
     //      Would also need to override #check(value, condition)
-    public NumberRequirementBuilder(ValueHolder<T> gui, T[] conditions, Pattern[] patterns) {
+    NumberRequirementBuilder(ValueHolder<T> gui, T[] conditions, Pattern[] patterns) {
         super(gui, conditions, patterns);
     }
     
     @SuppressWarnings("unchecked")
-    public static <T extends Number> NumberRequirementBuilder<?> from(Class<T> type, ValueHolder<T> gui, String[] conditions, Pattern[] patterns) {
+    static <T extends Number> NumberRequirementBuilder<?> from(Class<T> type, ValueHolder<T> gui, String[] conditions, Pattern[] patterns) {
         if (Short.class.isAssignableFrom(type)) {
             Short[] numbers = Arrays.stream(conditions)
                     .map(Short::valueOf)

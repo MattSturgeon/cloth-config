@@ -1,16 +1,18 @@
 package me.shedaniel.autoconfig.requirements.builder;
 
 import me.shedaniel.clothconfig2.api.ValueHolder;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-public class BooleanRequirementBuilder extends AbstractRequirementBuilder<Boolean, Boolean> {
+@ApiStatus.Internal
+class BooleanRequirementBuilder extends AbstractRequirementBuilder<Boolean, Boolean> {
     
     private static final Pattern TRUTHY = Pattern.compile("^(?:t(?:rue)?|y(?:es)?|on|enabled?)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern FALSEY = Pattern.compile("^(?:f(?:alse)?|no?|off|disabled?)$", Pattern.CASE_INSENSITIVE);
     
-    public BooleanRequirementBuilder(ValueHolder<Boolean> gui, String[] conditions, Pattern[] regexConditions) {
+    BooleanRequirementBuilder(ValueHolder<Boolean> gui, String[] conditions, Pattern[] regexConditions) {
         super(gui, parseConditions(conditions, regexConditions.length), regexConditions);
     }
     

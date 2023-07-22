@@ -3,15 +3,16 @@ package me.shedaniel.autoconfig.requirements.definition;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.gui.registry.GuiLookupTable;
 import me.shedaniel.autoconfig.requirements.HandlerLookupTable;
-import me.shedaniel.autoconfig.requirements.builder.*;
+import me.shedaniel.autoconfig.requirements.builder.RequirementBuilder;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.Requirement;
-import me.shedaniel.clothconfig2.api.ValueHolder;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+@ApiStatus.Internal
 record RequirementDefinitionEntry(
         Reference[] refs,
         String[] conditions,
@@ -61,27 +62,12 @@ record RequirementDefinitionEntry(
                     }
                     
                     // Build a static handler matching the Config Entry's value to the defined conditions
-                    return builder(gui).build();
-                    
+                    return RequirementBuilder
+                            .builder(gui, conditions(), regexConditions())
+                            .build();
                 })
                 .toArray(Requirement[]::new);
         
         return Requirement.any(requirements);
-    }
-    
-    @SuppressWarnings("unchecked")
-    private RequirementBuilder<?> builder(ValueHolder<?> gui) {
-        Class<?> type = gui.getType();
-        if (Boolean.class.equals(type)) {
-            return new BooleanRequirementBuilder((ValueHolder<Boolean>) gui, conditions(), regexConditions());
-        }
-        if (Enum.class.isAssignableFrom(type)) {
-            return new EnumRequirementBuilder<>((Class<Enum<?>>) type, (ValueHolder<Enum<?>>) gui, conditions(), regexConditions());
-        }
-        if (Number.class.isAssignableFrom(type)) {
-            return NumberRequirementBuilder.from((Class<Number>) type, (ValueHolder<Number>) gui, conditions(), regexConditions());
-        }
-        // TODO should we have a string-specific builder? Generic already does string comparing...
-        return new GenericRequirementBuilder<>((ValueHolder<Object>) gui, conditions(), regexConditions());
     }
 }

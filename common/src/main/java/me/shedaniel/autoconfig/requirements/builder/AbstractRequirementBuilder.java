@@ -7,16 +7,12 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public abstract class AbstractRequirementBuilder<T, C> implements RequirementBuilder<T>, ConditionChecker<T, C> {
+abstract class AbstractRequirementBuilder<T, C> implements RequirementBuilder<T>, ConditionChecker<T, C> {
     private final ValueHolder<T> gui;
     private final C[] conditions;
     private final Pattern[] patterns;
     
-    public AbstractRequirementBuilder(
-            ValueHolder<T> gui,
-            C[] conditions,
-            Pattern[] patterns
-    ) {
+    protected AbstractRequirementBuilder(ValueHolder<T> gui, C[] conditions, Pattern[] patterns) {
         this.gui = gui;
         this.conditions = conditions;
         this.patterns = patterns;

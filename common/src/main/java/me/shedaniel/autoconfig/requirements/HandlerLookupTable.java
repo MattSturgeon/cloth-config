@@ -4,12 +4,14 @@ import me.shedaniel.autoconfig.annotation.RequirementHandler;
 import me.shedaniel.autoconfig.requirements.builder.HandlerBuilder;
 import me.shedaniel.autoconfig.requirements.definition.Reference;
 import me.shedaniel.clothconfig2.api.Requirement;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@ApiStatus.Internal
 public class HandlerLookupTable {
     
     private final Map<String, Requirement> handlers = new HashMap<>();
@@ -44,7 +46,7 @@ public class HandlerLookupTable {
     public void register(Method method, Requirement handler) {
         handlers.compute(keyOf(method), (key, value) -> {
             if (value != null) {
-                throw new RuntimeException(new MultipleMethodsException("Error: Multiple methods have the same reference (\"%s\")".formatted(key)));
+                throw new RuntimeException("Error: Multiple methods have the same reference (\"%s\")".formatted(key));
             }
             
             return handler;

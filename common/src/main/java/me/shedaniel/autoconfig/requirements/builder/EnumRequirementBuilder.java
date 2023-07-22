@@ -1,14 +1,16 @@
 package me.shedaniel.autoconfig.requirements.builder;
 
 import me.shedaniel.clothconfig2.api.ValueHolder;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-public class EnumRequirementBuilder<T extends Enum<?>> extends AbstractRequirementBuilder<T, T> {
+@ApiStatus.Internal
+class EnumRequirementBuilder<T extends Enum<?>> extends AbstractRequirementBuilder<T, T> {
     
-    public EnumRequirementBuilder(Class<T> type, ValueHolder<T> gui, String[] conditions, Pattern[] regexConditions) {
+    EnumRequirementBuilder(Class<T> type, ValueHolder<T> gui, String[] conditions, Pattern[] regexConditions) {
         super(gui, parseConditions(type, conditions), regexConditions);
     }
     
