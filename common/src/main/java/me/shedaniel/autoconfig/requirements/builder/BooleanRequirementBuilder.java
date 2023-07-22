@@ -5,23 +5,16 @@ import me.shedaniel.clothconfig2.api.ValueHolder;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-public class BooleanRequirementBuilder extends AbstractRequirementBuilder<Boolean> {
+public class BooleanRequirementBuilder extends AbstractRequirementBuilder<Boolean, Boolean> {
     
     private static final Pattern TRUTHY = Pattern.compile("^(?:t(?:rue)?|y(?:es)?|on|enabled?)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern FALSEY = Pattern.compile("^(?:f(?:alse)?|no?|off|disabled?)$", Pattern.CASE_INSENSITIVE);
-    private final Boolean[] conditions;
     
     public BooleanRequirementBuilder(ValueHolder<Boolean> gui, String[] conditions, Pattern[] regexConditions) {
-        super(gui, regexConditions);
-        this.conditions = parseConditions(conditions);
+        super(gui, parseConditions(conditions, regexConditions.length), regexConditions);
     }
     
-    @Override
-    protected Boolean[] conditions() {
-        return conditions;
-    }
-    
-    private Boolean[] parseConditions(String[] conditions) {
+    private static Boolean[] parseConditions(String[] conditions, int otherConditions) {
         Boolean[] definedConditions = Arrays.stream(conditions)
                 .map(s -> {
                     if (TRUTHY.matcher(s).matches()) {
@@ -36,7 +29,7 @@ public class BooleanRequirementBuilder extends AbstractRequirementBuilder<Boolea
                 .toArray(Boolean[]::new);
         
         // For booleans, default to checking `true` if no conditions are defined
-        return definedConditions.length < 1 && this.regexConditions.length < 1
+        return definedConditions.length < 1 && otherConditions < 1
                 ? new Boolean[]{true}
                 : definedConditions;
         

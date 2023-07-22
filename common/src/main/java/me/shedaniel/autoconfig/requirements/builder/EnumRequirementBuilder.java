@@ -6,18 +6,10 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-public class EnumRequirementBuilder<T extends Enum<?>> extends AbstractRequirementBuilder<T> {
-    
-    private final T[] conditions;
+public class EnumRequirementBuilder<T extends Enum<?>> extends AbstractRequirementBuilder<T, T> {
     
     public EnumRequirementBuilder(Class<T> type, ValueHolder<T> gui, String[] conditions, Pattern[] regexConditions) {
-        super(gui, regexConditions);
-        this.conditions = parseConditions(type, conditions);
-    }
-    
-    @Override
-    protected T[] conditions() {
-        return conditions;
+        super(gui, parseConditions(type, conditions), regexConditions);
     }
     
     private static <T extends Enum<?>> T[] parseConditions(Class<T> type, String[] conditions) {

@@ -1,6 +1,5 @@
-package me.shedaniel.autoconfig.requirements.definition;
+package me.shedaniel.autoconfig.requirements.builder;
 
-import me.shedaniel.autoconfig.requirements.builder.AbstractRequirementBuilder;
 import me.shedaniel.clothconfig2.api.ValueHolder;
 
 import java.math.BigDecimal;
@@ -8,21 +7,14 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-public class NumberRequirementBuilder<T extends Number & Comparable<T>> extends AbstractRequirementBuilder<T> {
+public class NumberRequirementBuilder<T extends Number & Comparable<T>> extends AbstractRequirementBuilder<T, T> {
     
     // TODO consider allowing the user to specify comparison operators in condition strings
     //      would need to store conditions in a generic record class instead of just the raw number
     //      Something like NumberCondition(T number, Operator operator)
-    private final T[] conditions;
-    
+    //      Would also need to override #check(value, condition)
     public NumberRequirementBuilder(ValueHolder<T> gui, T[] conditions, Pattern[] patterns) {
-        super(gui, patterns);
-        this.conditions = conditions;
-    }
-    
-    @Override
-    protected T[] conditions() {
-        return conditions;
+        super(gui, conditions, patterns);
     }
     
     @SuppressWarnings("unchecked")
