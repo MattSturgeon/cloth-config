@@ -24,13 +24,13 @@ public class GenericRequirementBuilder<T>  implements RequirementBuilder<T> {
     }
     
     @Override
-    public boolean conditionsMatch(T value) {
+    public boolean conditionsMet(T value) {
         String string = value.toString();
         return List.of(conditions).contains(string);
     }
     
     @Override
-    public boolean regexConditionsMatch(T value) {
+    public boolean regexConditionsMet(T value) {
         String string = value.toString();
         return Arrays.stream(regexConditions)
                 .anyMatch(pattern -> pattern.matcher(string).matches());

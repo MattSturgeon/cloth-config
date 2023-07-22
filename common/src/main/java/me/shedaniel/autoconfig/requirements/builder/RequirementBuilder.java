@@ -5,17 +5,14 @@ import me.shedaniel.clothconfig2.api.Requirement;
 public interface RequirementBuilder<T> {
     T getValue();
     
-    boolean conditionsMatch(T value);
+    boolean conditionsMet(T value);
     
-    boolean regexConditionsMatch(T value);
+    boolean regexConditionsMet(T value);
     
     default Requirement build() {
         return () -> {
             T val = getValue();
-            if (conditionsMatch(val)) {
-                return true;
-            }
-            return regexConditionsMatch(val);
+            return conditionsMet(val) || regexConditionsMet(val);
         };
     }
 }

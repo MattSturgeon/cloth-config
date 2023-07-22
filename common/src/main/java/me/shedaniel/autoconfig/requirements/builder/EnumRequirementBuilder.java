@@ -15,6 +15,11 @@ public class EnumRequirementBuilder<T extends Enum<?>> extends AbstractRequireme
         this.conditions = parseConditions(type, conditions);
     }
     
+    @Override
+    protected T[] conditions() {
+        return conditions;
+    }
+    
     private static <T extends Enum<?>> T[] parseConditions(Class<T> type, String[] conditions) {
         T[] permitted = type.getEnumConstants();
         
@@ -25,10 +30,5 @@ public class EnumRequirementBuilder<T extends Enum<?>> extends AbstractRequireme
                         .orElseThrow(() -> new RuntimeException("Invalid enum constant \"%s\" (not found in %s)"
                                 .formatted(s, type.getCanonicalName()))))
                 .toArray(length -> (T[]) Array.newInstance(type, length));
-    }
-    
-    @Override
-    protected T[] conditions() {
-        return conditions;
     }
 }

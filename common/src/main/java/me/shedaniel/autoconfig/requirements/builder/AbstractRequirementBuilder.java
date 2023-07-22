@@ -26,14 +26,14 @@ public abstract class AbstractRequirementBuilder<T> implements RequirementBuilde
     }
     
     @Override
-    public boolean conditionsMatch(T value) {
+    public boolean conditionsMet(T value) {
         // TODO should we allow conditions to ignore case?
         //    Or is it ok that regex can provide this usage?
         return Arrays.asList(conditions()).contains(value);
     }
     
     @Override
-    public boolean regexConditionsMatch(T value) {
+    public boolean regexConditionsMet(T value) {
         String string = value.toString();
         return Arrays.stream(regexConditions)
                 .anyMatch(pattern -> pattern.matcher(string).matches());
