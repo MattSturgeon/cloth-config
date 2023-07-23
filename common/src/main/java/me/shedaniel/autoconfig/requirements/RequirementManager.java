@@ -1,6 +1,5 @@
 package me.shedaniel.autoconfig.requirements;
 
-import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.example.ExampleConfig;
 import me.shedaniel.autoconfig.gui.registry.GuiLookupTable;
 import me.shedaniel.autoconfig.requirements.builder.HandlerBuilder;
@@ -123,19 +122,6 @@ public class RequirementManager {
             System.out.printf("Error getting gui2: %s%n", t.getLocalizedMessage());
             t.printStackTrace(System.out);
         }
-    }
-    
-    /**
-     * Return true if a supported dependency annotation is <em>present</em> on the provided field.
-     *
-     * @param field the field to check
-     * @return whether the provided field has dependency annotations present
-     */
-    public static boolean hasRequirementAnnotation(Field field) {
-        return field.isAnnotationPresent(ConfigEntry.Requirement.EnableIf.class)
-               || field.isAnnotationPresent(ConfigEntry.Requirement.EnableIfGroup.class)
-               || field.isAnnotationPresent(ConfigEntry.Requirement.DisplayIf.class)
-               || field.isAnnotationPresent(ConfigEntry.Requirement.DisplayIfGroup.class);
     }
     
     private static Requirements buildRequirements(DynamicEntryListWidget.Entry gui, Collection<RequirementDefinition> requirements, GuiLookupTable guis, HandlerLookupTable handlers) {
