@@ -141,7 +141,7 @@ public class ConfigScreenProvider<T extends ConfigData> implements Supplier<Scre
         }
         
         // FIXME this might be too early to build, if there's multiple child Config classes?
-        registry.getRequirementManager().buildCustomRequirement();
+        registry.getRequirementManager().build();
         
         return buildFunction.apply(builder);
     }

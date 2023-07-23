@@ -1,22 +1,17 @@
 package me.shedaniel.autoconfig.requirements;
 
-import joptsimple.internal.Strings;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
-import me.shedaniel.autoconfig.annotation.RequirementHandler;
 import me.shedaniel.autoconfig.example.ExampleConfig;
 import me.shedaniel.autoconfig.gui.registry.GuiLookupTable;
+import me.shedaniel.autoconfig.requirements.builder.HandlerBuilder;
 import me.shedaniel.autoconfig.requirements.definition.Reference;
 import me.shedaniel.autoconfig.requirements.definition.RequirementDefinition;
-import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.Requirement;
-import me.shedaniel.clothconfig2.api.ValueHolder;
 import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.*;
 
 @ApiStatus.Internal
@@ -25,9 +20,11 @@ public class RequirementManager {
     private final GuiLookupTable guis;
     private final Collection<Class<?>> handlerClasses = new HashSet<>();
     private final Map<DynamicEntryListWidget.Entry, Set<RequirementDefinition>> requirements = new HashMap<>();
+    private final HandlerBuilder handlerBuilder;
     
     public RequirementManager(GuiLookupTable guiLookupTable) {
         this.guis = guiLookupTable;
+        handlerBuilder = HandlerBuilder.using(guis);
     }
     
     /**
@@ -63,8 +60,8 @@ public class RequirementManager {
         Collections.addAll(handlerClasses, classes);
     }
     
-    public void buildCustomRequirement() {
-        HandlerLookupTable handlers = HandlerLookupTable.fromClasses(handlerClasses, this::buildCustomRequirement);
+    public void build() {
+        HandlerLookupTable handlers = HandlerLookupTable.fromClasses(handlerClasses, handlerBuilder);
         requirements.forEach(((gui, definitions) ->
                 buildRequirements(gui, definitions, guis, handlers)
                         .apply()));
@@ -126,88 +123,6 @@ public class RequirementManager {
             System.out.printf("Error getting gui2: %s%n", t.getLocalizedMessage());
             t.printStackTrace(System.out);
         }
-    }
-    
-    // TODO extract to a builder class
-    private Requirement buildCustomRequirement(Method method, RequirementHandler definition) {
-        
-        // Validate method signature
-        Class<?> returnType = method.getReturnType();
-        if (returnType != boolean.class && returnType != Boolean.class) {
-            throw new RuntimeException(("Unexpected return type on %s#%s: expected %s but found %s\n")
-                    .formatted(method.getDeclaringClass().getCanonicalName(), method.getName(), Boolean.class, returnType));
-        }
-        
-        if (method.isVarArgs()) {
-            throw new RuntimeException(("Unexpected VarArgs on %s#%s: Variable arguments are not supported\n")
-                    .formatted(method.getDeclaringClass().getCanonicalName(), method.getName()));
-        }
-        
-        // TODO can we handle instance methods too? How would we find/store the object instance?
-        if (!Modifier.isStatic(method.getModifiers())) {
-            throw new RuntimeException(("Unexpected instance method %s#%s: Only static methods are supported\n")
-                    .formatted(method.getDeclaringClass().getCanonicalName(), method.getName()));
-        }
-        
-        // Ensure no exceptions are declared on the handler
-        List<String> exceptions = Arrays.stream(method.getExceptionTypes())
-                .map(Class::getCanonicalName)
-                .toList();
-        if (!exceptions.isEmpty()) {
-            throw new RuntimeException("Unexpected exceptions declared on %s#%s\n"
-                                               .formatted(method.getDeclaringClass().getCanonicalName(), method.getName())
-                                       + Strings.join(exceptions, "\n"));
-        }
-        
-        // Get a list of targeted guis (their values will be the method parameters)
-        int targetCount = definition.value().length;
-        List<AbstractConfigListEntry> targets = Arrays.stream(definition.value())
-                .map(reference -> Reference.parse(method.getDeclaringClass(), reference))
-                .map(this.guis::getGui)
-                .toList();
-        
-        
-        // Validate the method parameters are compatible with the targeted guis
-        List<String> typeErrors = new ArrayList<>(targetCount);
-        
-        if (method.getParameterCount() != targetCount) {
-            typeErrors.add("    Incorrect parameter count, expected %d found %d"
-                    .formatted(method.getParameterCount(), targetCount));
-        }
-        
-        Class<?>[] parameterTypes = method.getParameterTypes();
-        for (int i = 0, paramCount = parameterTypes.length; i < paramCount; i++) {
-            Class<?> paramType = parameterTypes[i];
-            Class<?> targetType = targets.get(i).getType();
-            
-            if (!targetType.isAssignableFrom(paramType)) {
-                typeErrors.add("    [param %s]: Expected `%s` found `%s`"
-                        .formatted(i, targetType, paramType));
-            }
-        }
-        
-        if (!typeErrors.isEmpty()) {
-            // TODO custom exception class
-            throw new RuntimeException("Invalid parameter types on %s#%s: (%d errors)\n"
-                                               .formatted(method.getDeclaringClass().getCanonicalName(), method.getName(), typeErrors.size())
-                                       + Strings.join(typeErrors, "\n"));
-        }
-        
-        // Build and return an actual Requirement function which will invoke the handler method
-        method.setAccessible(true);
-        return () -> {
-            Object[] args = targets.stream()
-                    .map(ValueHolder::getValue)
-                    .toArray();
-            
-            try {
-                return (Boolean) method.invoke(null, args);
-            } catch (Throwable t) {
-                throw new RuntimeException("Exception thrown while handling requirement using %s#%s"
-                        .formatted(method.getDeclaringClass().getCanonicalName(), method.getName()),
-                        t);
-            }
-        };
     }
     
     /**

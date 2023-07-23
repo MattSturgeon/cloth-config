@@ -110,10 +110,8 @@ public class ExampleConfig extends PartitioningSerializer.GlobalData {
         
         public static class Handlers {
             
-            // TODO support non canonical refs
-            // TODO support auto-boxing primitive parameter types
             @RequirementHandler("me.shedaniel.autoconfig.example.ExampleConfig.ModuleC.DependencySubCategory#coolToggle")
-            private static boolean coolToggleIsEnabled(Boolean coolToggle) {
+            private static boolean coolToggleIsEnabled(boolean coolToggle) {
                 return coolToggle;
             }
             
@@ -121,12 +119,12 @@ public class ExampleConfig extends PartitioningSerializer.GlobalData {
                     "ExampleConfig.ModuleC.DependencySubCategory#coolToggle",
                     "ExampleConfig.ModuleC.DependencySubCategory#lameToggle"
             })
-            private static boolean coolToggleMatchesLameToggle(Boolean coolToggle, Boolean lameToggle) {
+            private static Boolean coolToggleMatchesLameToggle(boolean coolToggle, Boolean lameToggle) {
                 return coolToggle == lameToggle;
             }
             
             @RequirementHandler("ExampleConfig.ModuleC.DependencySubCategory#intSlider")
-            private static boolean intSliderIsBigOrSmall(Integer intSlider) {
+            private static boolean intSliderIsBigOrSmall(int intSlider) {
                 return intSlider > 70 || intSlider < -70;
             }
             
@@ -140,7 +138,6 @@ public class ExampleConfig extends PartitioningSerializer.GlobalData {
         @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
         public DependencySubCategory dependencySubCategory = new DependencySubCategory();
         public static class DependencySubCategory {
-            // me.shedaniel.autoconfig.example.ExampleConfig.ModuleC.DependencySubCategory
     
             @ConfigEntry.Gui.Tooltip
             public boolean coolToggle = false;
@@ -167,12 +164,15 @@ public class ExampleConfig extends PartitioningSerializer.GlobalData {
     
             @ConfigEntry.Gui.TransitiveObject
             @ConfigEntry.Requirement.EnableIf("coolToggle")
-            @ConfigEntry.Requirement.EnableIf("ExampleConfig.ModuleC.Handlers#coolEnumIsGoodOrBetter")
+            @ConfigEntry.Requirement.EnableIf(value = "ExampleConfig.ModuleC.DependencySubCategory#coolEnum",
+            condition = { "GOOD", "EXCELLENT" })
             public DependantObject dependantObject = new DependantObject();
             public static class DependantObject {
                 @ConfigEntry.Gui.PrefixText
                 public boolean toggle1 = false;
-                @ConfigEntry.Requirement.EnableIf("ExampleConfig.ModuleC.Handlers#intSliderIsBigOrSmall")
+                // TODO consider allowing comparison operators in numerical condition strings?
+                @ConfigEntry.Requirement.EnableIf(value = "ExampleConfig.ModuleC.DependencySubCategory#intSlider",
+                condition = { "50", "100" })
                 public boolean toggle2 = true;
             }
     

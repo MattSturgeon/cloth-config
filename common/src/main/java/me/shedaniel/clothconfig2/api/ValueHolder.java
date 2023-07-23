@@ -42,8 +42,16 @@ public interface ValueHolder<T> {
     @ApiStatus.Internal
     @SuppressWarnings("unchecked")
     default Class<T> getType() {
+        T value = getValue();
+        if (value != null) {
+            // FIXME this doesn't work reliably for nullable values
+            return (Class<T>) value.getClass();
+        }
+        
         Class<T> type;
         try {
+            // FIXME this doesn't work when the final implementation is still generic.
+            //       (Object.class is always returned)
             Method valueMethod = this.getClass().getMethod("getValue");
             type = (Class<T>) valueMethod.getReturnType();
         } catch (NoSuchMethodException | ClassCastException e) {

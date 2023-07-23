@@ -15,8 +15,12 @@ public class GuiLookupTable {
     
     private final Map<String, List<AbstractConfigListEntry>> registered = new HashMap<>();
     
-    public AbstractConfigListEntry getGui(Reference reference) {
+    public @Nullable AbstractConfigListEntry getGui(Reference reference) {
         List<AbstractConfigListEntry> guis = getGuis(reference);
+        
+        if (guis == null || guis.isEmpty()) {
+            return null;
+        }
         
         // Negative index should be relative to end of array
         int index = reference.index() < 0
