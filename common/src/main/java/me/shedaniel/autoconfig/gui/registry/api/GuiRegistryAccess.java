@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public interface GuiRegistryAccess extends GuiProvider, GuiTransformer {
+public interface GuiRegistryAccess extends GuiProvider, GuiTransformer, GuiLookupAccess {
     default List<AbstractConfigListEntry> getAndTransform(
             String i18n,
             Field field,

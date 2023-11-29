@@ -33,11 +33,10 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
-public final class GuiRegistry implements GuiRegistryAccess {
+public final class GuiRegistry extends AbstractGuiRegistry {
     
     private final Map<Priority, List<ProviderEntry>> providers = new EnumMap<>(Priority.class);
     private final List<TransformerEntry> transformers = new ArrayList<>();
@@ -93,7 +92,7 @@ public final class GuiRegistry implements GuiRegistryAccess {
         List<GuiTransformer> matchedTransformers = this.transformers.stream()
                 .filter(entry -> entry.predicate.test(field))
                 .map(entry -> entry.transformer)
-                .collect(Collectors.toList());
+                .toList();
         
         for (GuiTransformer transformer : matchedTransformers) {
             guis = transformer.transform(guis, i18n, field, config, defaults, registry);

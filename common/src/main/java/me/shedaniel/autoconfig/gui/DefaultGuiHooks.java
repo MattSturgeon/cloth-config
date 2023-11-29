@@ -28,6 +28,10 @@ public class DefaultGuiHooks {
     private DefaultGuiHooks() {}
     
     public static GuiRegistry apply(GuiRegistry registry) {
+        
+        registry.registerPostHook((guis, i18n, field, config, defaults, guiProvider) ->
+                guiProvider.getLookupTable().register(field, guis));
+        
         return registry;
     }
 }
