@@ -43,7 +43,7 @@ public class DefaultRequirements {
         return Boolean.FALSE.equals(value);
     }
     
-    private static boolean is(Object value, Object condition) {
+    private static <T> boolean is(T value, T condition) {
         return Objects.equals(value, condition);
     }
     

@@ -95,4 +95,58 @@ public class Utils {
                 LinkedHashMap::new
         );
     }
+    
+    /**
+     * Checks if {@code to} can be assigned from {@code from}, including boxed types and their respective primitives.
+     */
+    public static boolean typesCompatible(Class<?> from, Class<?> to) {
+        if (to.isAssignableFrom(from)) {
+            return true;
+        }
+        if (to.isPrimitive()) {
+            return typesCompatible(from, boxPrimitive(to));
+        }
+        if (from.isPrimitive()) {
+            return typesCompatible(boxPrimitive(from), to);
+        }
+        return false;
+    }
+    
+    /**
+     * Converts a primitive class into a boxed class.
+     * 
+     * <p> If a non-primitive class is used, it is returned as-is.
+     */
+    public static Class<?> box(Class<?> cls) {
+        return cls.isPrimitive() ? boxPrimitive(cls) : cls;
+    }
+    
+    private static Class<?> boxPrimitive(Class<?> primitive) {
+        if (primitive == Integer.TYPE) {
+            return Integer.class;
+        }
+        if (primitive == Byte.TYPE) {
+            return Byte.class;
+        }
+        if (primitive == Short.TYPE) {
+            return Short.class;
+        }
+        if (primitive == Long.TYPE) {
+            return Long.class;
+        }
+        if (primitive == Float.TYPE) {
+            return Float.class;
+        }
+        if (primitive == Double.TYPE) {
+            return Double.class;
+        }
+        if (primitive == Boolean.TYPE) {
+            return Boolean.class;
+        }
+        if (primitive == Character.TYPE) {
+            return Character.class;
+        }
+        throw new IllegalStateException("%s#box() was passed a non-primitive class! %s"
+                .formatted(Utils.class.getCanonicalName(), primitive.getCanonicalName()));
+    }
 }

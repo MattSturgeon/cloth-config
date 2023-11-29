@@ -20,6 +20,7 @@
 package me.shedaniel.autoconfig.gui.registry;
 
 import me.shedaniel.autoconfig.gui.registry.api.GuiRegistryAccess;
+import me.shedaniel.autoconfig.requirements.RequirementManager;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -38,6 +39,7 @@ public class ComposedGuiRegistryAccess extends AbstractGuiRegistry {
         this.children = Arrays.asList(children);
         this.children.forEach(child -> {
             child.setLookupTable(this.getLookupTable());
+            child.setRequirementManager(this.getRequirementManager());
         });
     }
     
@@ -88,5 +90,11 @@ public class ComposedGuiRegistryAccess extends AbstractGuiRegistry {
     public void setLookupTable(GuiLookupTable table) {
         super.setLookupTable(table);
         children.forEach(child -> child.setLookupTable(table));
+    }
+    
+    @Override
+    public void setRequirementManager(RequirementManager manager) {
+        super.setRequirementManager(manager);
+        children.forEach(child -> child.setRequirementManager(manager));
     }
 }

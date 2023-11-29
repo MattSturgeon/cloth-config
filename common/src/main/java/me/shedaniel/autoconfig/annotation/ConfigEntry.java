@@ -20,6 +20,7 @@
 package me.shedaniel.autoconfig.annotation;
 
 import me.shedaniel.autoconfig.requirements.DefaultRequirements;
+import me.shedaniel.autoconfig.requirements.parser.ValueParser;
 import me.shedaniel.clothconfig2.api.DisableableWidget;
 import me.shedaniel.clothconfig2.api.HideableWidget;
 
@@ -224,6 +225,8 @@ public class ConfigEntry {
              * </ul>
              * 
              * <p>An exception will be thrown if a match is not found, parsing fails, or the expected type is not listed above.
+             * 
+             * @see ValueParser Parsing implementation
              */
             String[] staticArgs() default {};
         }

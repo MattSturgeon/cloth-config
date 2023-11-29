@@ -32,6 +32,9 @@ public class DefaultGuiHooks {
         registry.registerPostHook((guis, i18n, field, config, defaults, guiProvider) ->
                 guiProvider.getLookupTable().register(field, guis));
         
+        registry.registerPostHook((guis, i18n, field, config, defaults, guiProvider) ->
+                guiProvider.getRequirementManager().registerRequirements(guis, field));
+        
         return registry;
     }
 }

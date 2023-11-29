@@ -38,6 +38,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -136,6 +137,28 @@ public abstract class AbstractConfigEntry<T> extends DynamicElementListWidget.El
     }
     
     public abstract Optional<T> getDefaultValue();
+    
+    @Override
+    public Class<T> getType() {
+        // FIXME probably need to override in implementing classes or find a different approach
+        
+        T value = getValue();
+        if (value != null) {
+            // FIXME this doesn't work reliably for nullable values
+            return (Class<T>) value.getClass();
+        }
+        
+        Class<T> type;
+        try {
+            // FIXME this doesn't work when the final implementation is still generic.
+            //       (Object.class is always returned)
+            Method valueMethod = this.getClass().getMethod("getValue");
+            type = (Class<T>) valueMethod.getReturnType();
+        } catch (NoSuchMethodException | ClassCastException e) {
+            throw new IllegalStateException(e);
+        }
+        return type;
+    }
     
     @Nullable
     public final AbstractConfigScreen getConfigScreen() {

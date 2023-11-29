@@ -19,9 +19,11 @@
 
 package me.shedaniel.clothconfig2.api;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 public interface ValueHolder<T> {
+    
     /**
      * Get the value held by this Value Holder.
      * 
@@ -30,4 +32,26 @@ public interface ValueHolder<T> {
      * @return the current value.
      */
     T getValue();
+    
+    @ApiStatus.Internal
+    Class<T> getType();
+    
+    @SuppressWarnings("unchecked")
+    static <T> ValueHolder<T> of(T value) {
+        return of((Class<T>) value.getClass(), value);
+    }
+    
+    static <T> ValueHolder<T> of(Class<T> type, T value) {
+        return new ValueHolder<>() {
+            @Override
+            public T getValue() {
+                return value;
+            }
+            
+            @Override
+            public Class<T> getType() {
+                return type;
+            }
+        };
+    }
 }

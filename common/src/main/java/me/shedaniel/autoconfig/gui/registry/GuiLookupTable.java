@@ -20,6 +20,24 @@ public class GuiLookupTable {
         return registered.getOrDefault(field, Collections.emptyList());
     }
     
+    public @Nullable AbstractConfigListEntry getGui(Field field, int index) {
+        List<AbstractConfigListEntry> guis = getGuis(field);
+        
+        if (guis == null || guis.isEmpty()) {
+            return null;
+        }
+        
+        // Negative index should be relative to end of array
+        int i = index < 0 ? guis.size() + index : index;
+        
+        if (i < 0 || i >= guis.size()) {
+            throw new IndexOutOfBoundsException("Index %d is out of bounds (expected between 0 and %d)"
+                    .formatted(i, guis.size() - 1));
+        }
+        
+        return guis.get(i);
+    }
+    
     public void register(Field field, @Nullable AbstractConfigListEntry ...guis) {
         if (guis == null) {
             registered.remove(field);
